@@ -1,12 +1,36 @@
 ---
 description: Writes tests from the spec, without reading the implementation. Use after implementer finishes a task.
 mode: subagent
+model: openai/gpt-5.4-mini
+variant: low
 permission:
+  read:
+    "*": deny
+    "specs/**": allow
+    "docs/business-rules.md": allow
+    "**/*.spec.ts": allow
+    "**/*.test.ts": allow
+    "test/**": allow
+    "package.json": allow
+    "tsconfig*.json": allow
+  grep:
+    "*": deny
+    "specs/**": allow
+    "docs/business-rules.md": allow
+    "**/*.spec.ts": allow
+    "**/*.test.ts": allow
+    "test/**": allow
   edit:
     "*": deny
     "**/*.spec.ts": allow
     "**/*.test.ts": allow
     "test/**": allow
+  bash:
+    "*": deny
+    "npm test*": allow
+    "npm run test*": allow
+    "npx jest*": allow
+    "git status*": allow
 ---
 
 Write tests for the given task from the specification.

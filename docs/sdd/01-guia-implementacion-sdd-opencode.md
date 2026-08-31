@@ -39,8 +39,9 @@ Hazlos en orden. Cada paso se verifica solo, sin depender del siguiente.
    Error(...)` para bloquear — el error le llega al agente como razón.
 3. **Multi-proveedor real.** `opencode auth login` conecta OpenCode Zen,
    OpenRouter, GitHub Copilot, ChatGPT Plus, Anthropic API o modelos locales.
-   Además puedes asignar **un modelo distinto por agente** (uno barato para
-   test-writer, uno potente para implementer). Esto resuelve directamente el
+   Además puedes asignar **un modelo distinto por agente**: uno general para
+   la sesión principal y modelos baratos, con distinto nivel de razonamiento,
+   para implementer, test-writer y reviewer. Esto resuelve directamente el
    problema del límite de suscripción.
 
 ---
@@ -107,7 +108,7 @@ mkdir -p docs scripts .github
 
 `jq --version || echo "instala jq"`
 
-Fija el modelo por defecto en `opencode.json`:
+Fija los modelos por defecto en `opencode.json`:
 
 Crea el archivo`opencode.json` dentro de `.opencode`,
 
@@ -116,14 +117,20 @@ Luego agrega lo siguiente:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "anthropic/claude-sonnet-4-20250514"
+  "model": "openai/gpt-5.5",
+  "small_model": "openai/gpt-5.4-mini"
 }
 ```
 
-Nota: El modelo que elijas por defecto debe estar disponible en base a el proveedor que tengas.
+`model` se usa en la sesión principal. `small_model` evita gastar el modelo
+principal en tareas auxiliares como títulos y resúmenes.
+
+Nota: Los modelos elegidos deben estar disponibles en el proveedor autenticado.
 
 > El formato es `proveedor/modelo`. Ajusta al proveedor que autenticaste.
-> Puedes sobreescribir el modelo por agente (pasos 10-12) y por comando.
+> Puedes sobreescribir el modelo y su `variant` de razonamiento por agente
+> (pasos 10-12) y por comando. Evita las variantes `-fast` si quieres priorizar
+> el ahorro: usan el service tier de prioridad.
 
 Agrega a `.gitignore`:
 
@@ -391,10 +398,13 @@ parado en main? ¿hay una migración nueva?).
       "*": "allow",
       "git push * main*": "deny",
       "git push * master*": "deny",
+      "git push *:main*": "deny",
+      "git push *:master*": "deny",
+      "git push --force*": "deny",
       "git push * --force*": "deny",
-      "* --no-verify *": "deny",
-      "git reset --hard *": "deny",
-      "gh pr merge *": "deny"
+      "*--no-verify*": "deny",
+      "git reset --hard*": "deny",
+      "gh pr merge*": "deny"
     }
   }
 }
@@ -672,6 +682,8 @@ el spec, que ya están en contexto.
 ---
 description: Implements exactly one task from tasks.md. Use after a task is selected and before tests are written.
 mode: subagent
+model: openai/gpt-5.3-codex-spark
+variant: medium
 permission:
   edit: allow
   bash:
@@ -709,8 +721,9 @@ The task is implemented and `npm run build` passes.
 ```
 
 > En opencode el control de herramientas es por `permission` (el campo `tools`
-> está deprecado). Puedes además asignar `model:` por agente — un modelo más
-> barato para `test-writer`, el potente para `implementer`.
+> está deprecado). Aquí el implementer usa Codex Spark con razonamiento medio:
+> es un modelo económico y enfocado en código para una sola task acotada. La
+> sesión principal conserva el modelo general más capaz para orquestar.
 
 **Verificación.** El archivo cabe en una pantalla. Si necesitas más, algo
 pertenece a la constitution.
@@ -734,12 +747,36 @@ detectar que el implementer entendió mal. Vale una diapositiva entera.
 ---
 description: Writes tests from the spec, without reading the implementation. Use after implementer finishes a task.
 mode: subagent
+model: openai/gpt-5.4-mini
+variant: low
 permission:
+  read:
+    "*": deny
+    "specs/**": allow
+    "docs/business-rules.md": allow
+    "**/*.spec.ts": allow
+    "**/*.test.ts": allow
+    "test/**": allow
+    "package.json": allow
+    "tsconfig*.json": allow
+  grep:
+    "*": deny
+    "specs/**": allow
+    "docs/business-rules.md": allow
+    "**/*.spec.ts": allow
+    "**/*.test.ts": allow
+    "test/**": allow
   edit:
     "*": deny
     "**/*.spec.ts": allow
     "**/*.test.ts": allow
     "test/**": allow
+  bash:
+    "*": deny
+    "npm test*": allow
+    "npm run test*": allow
+    "npx jest*": allow
+    "git status*": allow
 ---
 
 Write tests for the given task from the specification.
@@ -775,9 +812,11 @@ Every test naming a rule starts with its ID:
 - Any test that fails, with the discrepancy against the spec
 ```
 
-> **Bonus opencode:** la restricción "solo toca archivos de test" aquí no es
-> solo una instrucción — el bloque `permission.edit` con globs la hace
-> cumplir de forma determinista. Otra regla que migra de prompt a config.
+> **Bonus opencode:** la independencia spec↔código no queda solo en el prompt.
+> `permission.read` y `permission.grep` impiden inspeccionar producción;
+> `permission.edit` limita las escrituras a tests; y `permission.bash` solo
+> permite ejecutar tests y consultar estado. El modelo mini con razonamiento
+> bajo reduce además el costo del agente de mayor volumen.
 
 **Verificación.** Rompe una regla en el código a propósito. El test
 correspondiente debe fallar. Si pasa, el test no sirve.
@@ -798,6 +837,8 @@ más. Corre después para no gastar tokens revisando código que no compila.
 ---
 description: Reviews a diff against the spec and constitution. Use only after lint, typecheck, tests and build pass.
 mode: subagent
+model: openai/gpt-5.4-mini
+variant: high
 permission:
   edit: deny
   bash:
@@ -839,7 +880,8 @@ No praise. No suggestions outside the task scope.
 
 > Read-only **por construcción**: `edit: deny` + bash restringido a comandos
 > de lectura. Si el modelo intenta editar, el permiso lo bloquea antes de
-> ejecutar.
+> ejecutar. El reviewer usa el modelo mini, pero con razonamiento `high`: se
+> paga razonamiento adicional solo en el gate final donde aporta más valor.
 
 **Verificación.** Mete una violación obvia (lógica de negocio en un
 controller) y confirma que la detecta citando el principio I.
@@ -1221,10 +1263,15 @@ La razón original de la migración. En opencode:
    OpenCode Zen, OpenRouter, Anthropic API directa, GitHub Copilot, ChatGPT
    Plus, Google, y servidores locales (Ollama/LM Studio). Si un proveedor se
    agota, cambias de modelo con `/models` sin tocar nada del setup.
-2. **Modelo por agente.** El frontmatter `model:` permite poner un modelo
-   económico en `test-writer` y `reviewer` (volumen alto, juicio mecánico) y
-   reservar el modelo potente para `implementer` y la orquestación.
-3. **`opencode stats`** te da uso de tokens y costo por sesión/día — con el
+2. **Modelo por agente.** Este setup usa `openai/gpt-5.5` para la sesión
+   principal, `openai/gpt-5.3-codex-spark` con `variant: medium` para
+   implementer, y `openai/gpt-5.4-mini` para test-writer (`low`) y reviewer
+   (`high`). Así el modelo general más capaz orquesta, mientras el trabajo
+   repetitivo ocurre en modelos baratos. El razonamiento alto se reserva para
+   el reviewer, que corre una vez al final de cada task.
+3. **Modelo auxiliar.** `small_model: openai/gpt-5.4-mini` evita usar el modelo
+   principal para títulos, resúmenes y otras tareas internas.
+4. **`opencode stats`** te da uso de tokens y costo por sesión/día — con el
    plugin de telemetría del paso 9 tienes costo por feature, que es el número
    que tu audiencia va a preguntar.
 

@@ -1,6 +1,8 @@
 ---
 description: Implements exactly one task from tasks.md. Use after a task is selected and before tests are written.
 mode: subagent
+model: openai/gpt-5.3-codex-spark
+variant: medium
 permission:
   edit: allow
   bash:
