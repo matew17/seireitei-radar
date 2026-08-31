@@ -18,7 +18,9 @@
   },
   "plugin": [
     "./plugins/git-guard.ts",
-    "./plugins/fast-check.ts"
+    "./plugins/fast-check.ts",
+    "./plugins/prisma-guard.ts",
+    "./plugins/telemetry.ts"
   ]
 }
 
