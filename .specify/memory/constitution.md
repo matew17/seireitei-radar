@@ -1,50 +1,44 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Seiretei Radar — Constitution
 
-## Core Principles
+Non-negotiable. Any violation blocks the work.
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+## I. Architecture
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+- One NestJS module per bounded context.
+- Controllers: input validation and HTTP mapping only. No business logic.
+- Services: business rules. Repositories: Prisma access.
+- All input validated with DTO + class-validator.
+- No `any` in public signatures.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+## II. Data
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+- Every `schema.prisma` change requires a versioned migration in the same commit.
+- Never edit an applied migration. Never `prisma db push` outside local dev.
+- Business invariants expressible as a Postgres constraint MUST live in the
+  database, not only in the service. Concurrency-sensitive rules (overlap,
+  uniqueness, capacity) always fall in this category.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+## III. Testing
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+- Every rule BR-xx has at least one test naming its ID.
+- Rules involving concurrency or exclusivity are tested against a real
+  Postgres instance, never a mocked Prisma client.
+- Coverage is not the metric. Rule-to-test traceability is.
+- A test that passes when its rule is broken is a defect.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## IV. Errors
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+- Domain exceptions mapped to HTTP in a global filter.
+- Never expose Prisma error messages to clients.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## V. Git
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+- Conventional Commits. One commit per task.
+- Branch `feat/&lt;spec-id&gt;-&lt;slug&gt;`.
+- Direct push to main is forbidden. `--no-verify` is forbidden.
+- Merge is always human.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+## VI. Scope
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+- An agent implements the current task and nothing else.
+- Out-of-scope improvements are reported, never applied.

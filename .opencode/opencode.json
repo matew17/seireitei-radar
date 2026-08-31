@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "",
+  "autoupdate": true,
+  "server": {
+    "port": 4096
+  },
+   "permission": {
+    "bash": {
+      "*": "allow",
+      "git push * main*": "deny",
+      "git push * master*": "deny",
+      "git push * --force*": "deny",
+      "* --no-verify *": "deny",
+      "git reset --hard *": "deny",
+      "gh pr merge *": "deny"
+    }
+  },
+  "plugin": [
+    "./plugins/git-guard.ts"
+  ]
+}
+
