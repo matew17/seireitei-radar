@@ -36,7 +36,7 @@
 - [x] T007 Register `SquadsModule` and `PrismaModule` in `src/app.module.ts`
 - [x] T008 Add a versioned Prisma migration under `prisma/migrations/` that creates PostgreSQL check constraint `Squad_maxThreatLevel_check` enforcing BR-03 values 1, 2, and 3
 - [x] T009 [P] Create e2e test helpers for clearing and seeding squads in `test/squads-test-utils.ts`
-- [ ] T010 [P] Add BR-03 real PostgreSQL constraint test in `test/squads.e2e-spec.ts` that names `BR-03` and proves invalid `maxThreatLevel` is rejected by the database
+- [x] T010 [P] Add BR-03 real PostgreSQL constraint test in `test/squads.e2e-spec.ts` that names `BR-03` and proves invalid `maxThreatLevel` is rejected by the database
 - [ ] T011 [P] Add BR-02 real PostgreSQL uniqueness test in `test/squads.e2e-spec.ts` that names `BR-02` and proves duplicate `number` is rejected by the database
 
 **Checkpoint**: Foundation ready; user story implementation can begin.

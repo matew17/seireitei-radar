@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, Squad } from '../generated/prisma/client';
+import type { Prisma, PrismaClient, Squad } from '../generated/prisma/client';
 
 export async function clearSquads(prisma: PrismaClient): Promise<void> {
   await prisma.squad.deleteMany();
