@@ -8,12 +8,10 @@ Hazlos en orden. Cada paso se verifica solo, sin depender del siguiente.
 > **Convención:** los archivos que consume opencode (agentes, comandos,
 > constitution) van en **inglés** — menos tokens y es donde el modelo está
 > mejor calibrado. La documentación para humanos va en español.
-
 > **Placeholders:** esta guía es agnóstica del proyecto. Donde veas
 > `<PROYECTO>`, `<DOMINIO>`, `<ENTIDAD>` o reglas `BR-xx` de ejemplo,
 > reemplázalos por las decisiones de tu demo. El stack base sí es fijo:
 > **NestJS + TypeScript + Prisma + PostgreSQL**.
-
 ---
 
 ## Mapa de equivalencias Claude Code → opencode
@@ -89,33 +87,32 @@ opencode --version
 echo 'export PATH="/Users/<your-username>/.opencode/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 ```
 
-# Autentica al menos un proveedor (elige el tuyo)
+### Autentica al menos un proveedor (elige el tuyo)
 
 opencode auth login
 
-# Verifica
+### Verifica
 
 node -v        # 20+
 gh auth status # autenticado
 git branch --show-current
 
-# Crea la estructura
+### Crea la estructura
 
 mkdir -p .opencode/{agents,commands,plugins}
 mkdir -p .sdd/runs
 mkdir -p docs scripts .github
 
-# jq es requisito de los scripts auxiliares
+### jq es requisito de los scripts auxiliares
 
-jq --version || echo "instala jq"
-
-```
+`jq --version || echo "instala jq"`
 
 Fija el modelo por defecto en `opencode.json`:
 
-Crea el archivo`opencode.json` dentro de `.opencode`, 
+Crea el archivo`opencode.json` dentro de `.opencode`,
 
 Luego agrega lo siguiente:
+
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
@@ -130,7 +127,7 @@ Nota: El modelo que elijas por defecto debe estar disponible en base a el provee
 
 Agrega a `.gitignore`:
 
-```
+```bash
 .sdd/runs/
 .sdd/blocked.md
 ```
@@ -1125,11 +1122,62 @@ opencode. GitHub debe rechazarlo.
 
 ---
 
+## Paso 19 - CI/CD Agregar Aithub action
+
+Crea un action en github para que cualquier Pull Request contra main, requiera una validacion de al menos pasar Build, test y Linter.
+
+Crea el siguiente archivo y lo subes a tu repo.
+
+`.github/workflows/CI-PR-Check.yml`
+
+```yml
+name: CI / PR Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-pr:
+    name: Lint, Test, and Build
+    runs-on: ubuntu-latest
+    
+    # Fake url generation so Prisma pass
+    env:
+      DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy_db?schema=public"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Unit Tests
+        run: npm run test
+
+      - name: Build Application
+        run: npm run build
+```
+
 ## Orden de verificación final
 
 Cuando termines los 18 pasos, prueba el flujo completo con una feature real:
 
-```
+```bash
 /sdd-new <tu primera feature>
    → responde las preguntas de clarify
    → revisa y aprueba el spec
