@@ -1,39 +1,39 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+    provider = "prisma-client"
+    output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 model Squad {
-  id              String        @id @default(uuid())
-  number          Int           @unique
-  captainName     String
-  isAvailable     Boolean       @default(true)
-  maxThreatLevel  Int           // Capacity: 1 (Hollow), 2 (Menos), 3 (Espada)
-  currentLat      Float         
-  currentLng      Float         
-  alerts          ThreatAlert[]
+    id             String        @id @default(uuid())
+    number         Int           @unique
+    captainName    String
+    isAvailable    Boolean       @default(true)
+    maxThreatLevel Int // Capacity: 1 (Hollow), 2 (Menos), 3 (Espada)
+    currentLat     Float
+    currentLng     Float
+    alerts         ThreatAlert[]
 }
 
 enum AlertStatus {
-  PENDING
-  ASSIGNED
-  RESOLVED
+    PENDING
+    ASSIGNED
+    RESOLVED
 }
 
 model ThreatAlert {
-  id          String      @id @default(uuid())
-  threatLevel Int         // 1, 2, or 3
-  latitude    Float
-  longitude   Float
-  status      AlertStatus @default(PENDING)
-  
-  squadId     String?
-  squad       Squad?      @relation(fields: [squadId], references: [id])
-  
-  createdAt   DateTime    @default(now())
+    id          String      @id @default(uuid())
+    threatLevel Int // 1, 2, or 3
+    latitude    Float
+    longitude   Float
+    status      AlertStatus @default(PENDING)
+
+    squadId String?
+    squad   Squad?  @relation(fields: [squadId], references: [id])
+
+    createdAt DateTime @default(now())
 }
