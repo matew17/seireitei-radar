@@ -1,0 +1,19 @@
+{
+  "mode": "semi",
+  "modes": {
+    "assisted": "Confirms before each task. For live demos.",
+    "semi": "Autonomous until PR. Stops at spec gate and at PR.",
+    "auto": "Autonomous from tasks.md to PR. Never merges."
+  },
+  "limits": {
+    "maxFilesPerTask": 10,
+    "maxReviewRetries": 3,
+    "maxTasksPerRun": 10,
+    "stopOnFirstFailure": true
+  },
+  "gates": {
+    "specApproval": "always_human",
+    "merge": "always_human"
+  },
+  "branchPrefix": "feat/"
+}
