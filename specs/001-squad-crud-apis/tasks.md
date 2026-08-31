@@ -22,7 +22,7 @@
 - [x] T002 Enable global validation pipe and domain exception filter registration in `src/main.ts`
 - [x] T003 [P] Create Prisma module and service in `src/prisma/prisma.module.ts` and `src/prisma/prisma.service.ts`
 - [x] T004 [P] Create domain error primitives in `src/common/errors/domain-error.ts`
-- [ ] T005 [P] Create global domain exception filter in `src/common/filters/domain-exception.filter.ts`
+- [x] T005 [P] Create global domain exception filter in `src/common/filters/domain-exception.filter.ts`
 
 ---
 
