@@ -17,7 +17,8 @@
     }
   },
   "plugin": [
-    "./plugins/git-guard.ts"
+    "./plugins/git-guard.ts",
+    "./plugins/fast-check.ts"
   ]
 }
 

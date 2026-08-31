@@ -113,12 +113,17 @@ jq --version || echo "instala jq"
 
 Fija el modelo por defecto en `opencode.json`:
 
+Crea el archivo`opencode.json` dentro de `.opencode`, 
+
+Luego agrega lo siguiente:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "anthropic/claude-sonnet-4-20250514"
 }
 ```
+
+Nota: El modelo que elijas por defecto debe estar disponible en base a el proveedor que tengas.
 
 > El formato es `proveedor/modelo`. Ajusta al proveedor que autenticaste.
 > Puedes sobreescribir el modelo por agente (pasos 10-12) y por comando.
@@ -474,9 +479,9 @@ import type { Plugin } from "@opencode-ai/plugin"
 
 export const FastCheck: Plugin = async ({ $ }) => {
   return {
-    "tool.execute.after": async (input, output) => {
+    "tool.execute.after": async (input) => {
       if (input.tool !== "edit" && input.tool !== "write") return
-      const file: string = output.args.filePath ?? ""
+      const file: string = input.args.filePath ?? ""
       if (!file.endsWith(".ts")) return
       await $`npx eslint --fix ${file}`.quiet().nothrow()
     },
@@ -536,6 +541,17 @@ falló.
 **Práctica.** *Validator loop* — generar → validar → corregir → repetir.
 
 ---
+
+## Paso 7.1 - Agrega los plugins en opencode.json
+
+Por defecto opencode detecta los plugins que hay disponibles, sin embargo puedes agregarlos en opencode.json para estar seguro.
+
+```json
+  "plugin": [
+    "./plugins/git-guard.ts",
+    "./plugins/fast-check.ts"
+  ]
+```
 
 ## Paso 8 — Plugin `prisma-guard`
 
