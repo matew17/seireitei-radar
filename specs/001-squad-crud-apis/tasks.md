@@ -33,7 +33,7 @@
 **CRITICAL**: No user story work can begin until this phase is complete.
 
 - [x] T006 Create Squad module skeleton in `src/squads/squads.module.ts`, `src/squads/squads.controller.ts`, `src/squads/squads.service.ts`, and `src/squads/squads.repository.ts`
-- [ ] T007 Register `SquadsModule` and `PrismaModule` in `src/app.module.ts`
+- [x] T007 Register `SquadsModule` and `PrismaModule` in `src/app.module.ts`
 - [ ] T008 Add a versioned Prisma migration under `prisma/migrations/` that creates PostgreSQL check constraint `Squad_maxThreatLevel_check` enforcing BR-03 values 1, 2, and 3
 - [ ] T009 [P] Create e2e test helpers for clearing and seeding squads in `test/squads-test-utils.ts`
 - [ ] T010 [P] Add BR-03 real PostgreSQL constraint test in `test/squads.e2e-spec.ts` that names `BR-03` and proves invalid `maxThreatLevel` is rejected by the database
