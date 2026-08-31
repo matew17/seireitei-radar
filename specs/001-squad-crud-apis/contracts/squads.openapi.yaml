@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: Squad CRUD APIs
+  version: 0.1.0
+paths:
+  /squads:
+    post:
+      summary: Create a squad
+      operationId: createSquad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSquadRequest'
+      responses:
+        '201':
+          description: Squad created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Squad'
+        '400':
+          description: Invalid squad input, including BR-03 violations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Squad number already exists; covers BR-02
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List all squads
+      operationId: listSquads
+      responses:
+        '200':
+          description: All squads, including unavailable squads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Squad'
+  /squads/{id}:
+    get:
+      summary: Get a squad by identity
+      operationId: getSquad
+      parameters:
+        - $ref: '#/components/parameters/SquadId'
+      responses:
+        '200':
+          description: Squad found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Squad'
+        '404':
+          description: Squad not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Partially update a squad
+      operationId: updateSquad
+      parameters:
+        - $ref: '#/components/parameters/SquadId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSquadRequest'
+      responses:
+        '200':
+          description: Squad updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Squad'
+        '400':
+          description: Invalid squad input, including BR-03 violations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Squad not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Squad number already exists; covers BR-02
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Mark a squad unavailable
+      operationId: removeSquad
+      parameters:
+        - $ref: '#/components/parameters/SquadId'
+      responses:
+        '200':
+          description: Squad marked unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Squad'
+        '404':
+          description: Squad not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  parameters:
+    SquadId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Squad:
+      type: object
+      required:
+        - id
+        - number
+        - captainName
+        - isAvailable
+        - maxThreatLevel
+        - currentLat
+        - currentLng
+      properties:
+        id:
+          type: string
+        number:
+          type: integer
+        captainName:
+          type: string
+        isAvailable:
+          type: boolean
+        maxThreatLevel:
+          type: integer
+          enum: [1, 2, 3]
+        currentLat:
+          type: number
+        currentLng:
+          type: number
+    CreateSquadRequest:
+      type: object
+      required:
+        - number
+        - captainName
+        - maxThreatLevel
+        - currentLat
+        - currentLng
+      properties:
+        number:
+          type: integer
+        captainName:
+          type: string
+          minLength: 1
+        isAvailable:
+          type: boolean
+          default: true
+        maxThreatLevel:
+          type: integer
+          enum: [1, 2, 3]
+        currentLat:
+          type: number
+        currentLng:
+          type: number
+    UpdateSquadRequest:
+      type: object
+      minProperties: 1
+      properties:
+        number:
+          type: integer
+        captainName:
+          type: string
+          minLength: 1
+        isAvailable:
+          type: boolean
+        maxThreatLevel:
+          type: integer
+          enum: [1, 2, 3]
+        currentLat:
+          type: number
+        currentLng:
+          type: number
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: string
