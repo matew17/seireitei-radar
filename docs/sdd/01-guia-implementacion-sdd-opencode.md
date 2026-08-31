@@ -874,6 +874,21 @@ Execute these steps in order. Stop immediately if any step reports a blocking
 problem — do not continue to the next.
 
 1. Read `.specify/memory/constitution.md` and `docs/business-rules.md`.
+    1.1. Determine whether the feature introduces new business rules.
+
+    A business rule is a domain invariant that could be violated and must be
+    enforced somewhere. "Returns 200 on success" is not a rule. "No two active
+    bookings may overlap" is.
+
+    If the feature needs rules not yet in docs/business-rules.md:
+
+    - Propose them with the next free BR-xx ids, stating where each is enforced
+    - Present them to the user and STOP
+    - Add them to docs/business-rules.md only after approval
+    - If a proposed rule replaces an existing one, mark the old one deprecated.
+    Never renumber.
+
+    If no new rules are needed, say so and continue.
 
 2. Read `.opencode/commands/speckit.specify.md` and follow its instructions,
    passing the feature description enriched with the BR-xx rules that apply.
