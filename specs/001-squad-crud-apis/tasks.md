@@ -52,7 +52,7 @@
 ### Tests for User Story 1
 
 - [x] T012 [P] [US1] Add create squad API e2e tests for success and default availability in `test/squads.e2e-spec.ts`
-- [ ] T013 [P] [US1] Add create squad e2e tests naming `BR-02` and `BR-03` for duplicate number and invalid max threat level in `test/squads.e2e-spec.ts`
+- [x] T013 [P] [US1] Add create squad e2e tests naming `BR-02` and `BR-03` for duplicate number and invalid max threat level in `test/squads.e2e-spec.ts`
 - [ ] T014 [P] [US1] Add service unit tests for create behavior and client-safe duplicate handling in `src/squads/squads.service.spec.ts`
 
 ### Implementation for User Story 1
