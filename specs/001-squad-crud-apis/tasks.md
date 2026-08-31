@@ -18,7 +18,7 @@
 
 **Purpose**: Establish shared NestJS infrastructure required by all Squad stories.
 
-- [ ] T001 Install DTO validation dependencies `class-validator` and `class-transformer` in `package.json` and `package-lock.json`
+- [x] T001 Install DTO validation dependencies `class-validator` and `class-transformer` in `package.json` and `package-lock.json`
 - [ ] T002 Enable global validation pipe and domain exception filter registration in `src/main.ts`
 - [ ] T003 [P] Create Prisma module and service in `src/prisma/prisma.module.ts` and `src/prisma/prisma.service.ts`
 - [ ] T004 [P] Create domain error primitives in `src/common/errors/domain-error.ts`
