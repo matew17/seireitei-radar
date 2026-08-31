@@ -568,9 +568,9 @@ import type { Plugin } from "@opencode-ai/plugin"
 
 export const PrismaGuard: Plugin = async ({ $ }) => {
   return {
-    "tool.execute.after": async (input, output) => {
+    "tool.execute.after": async (input) => {
       if (input.tool !== "edit" && input.tool !== "write") return
-      const file: string = output.args.filePath ?? ""
+      const file: string = input.args.filePath ?? ""
       if (!file.endsWith("schema.prisma")) return
 
       const schemaDiff =
@@ -603,6 +603,8 @@ export const PrismaGuard: Plugin = async ({ $ }) => {
 cambio adicional. El plugin debe bloquear con el mensaje de la constitution.
 
 ---
+
+Nota: Agrega este nuevo plugin a la lista en opencode.json
 
 ## Paso 9 — Plugin `telemetry`
 
@@ -654,6 +656,8 @@ export const Telemetry: Plugin = async ({ directory }) => {
 líneas.
 
 **Práctica.** *Eval-driven development* — no puedes mejorar lo que no mides.
+
+Nota: Agrega este nuevo plugin a la lista en opencode.json
 
 ---
 
