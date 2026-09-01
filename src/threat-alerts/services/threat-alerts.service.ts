@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma, ThreatAlert } from '../../../generated/prisma/client';
-import { ValidationError } from '../../common/errors/domain-error';
+import {
+  NotFoundError,
+  ValidationError,
+} from '../../common/errors/domain-error';
 import { ThreatAlertsRepository } from '../repositories/threat-alerts.repository';
 
 @Injectable()
@@ -24,6 +27,20 @@ export class ThreatAlertsService {
 
       throw error;
     }
+  }
+
+  async list(): Promise<ThreatAlert[]> {
+    return this.threatAlertsRepository.list();
+  }
+
+  async get(id: string): Promise<ThreatAlert> {
+    const threatAlert = await this.threatAlertsRepository.get(id);
+
+    if (!threatAlert) {
+      throw new NotFoundError('ThreatAlert not found');
+    }
+
+    return threatAlert;
   }
 
   private isCheckConstraintError(

@@ -117,4 +117,81 @@ describe('ThreatAlert creation (e2e)', () => {
       }),
     ).rejects.toThrow('ThreatAlert_threatLevel_check');
   });
+
+  it('returns every alert in the list, including resolved alerts', async () => {
+    const pending = await prisma.threatAlert.create({
+      data: { threatLevel: 1, latitude: 35.1, longitude: 139.1 },
+    });
+    const resolved = await prisma.threatAlert.create({
+      data: {
+        threatLevel: 3,
+        latitude: 35.2,
+        longitude: 139.2,
+        status: 'RESOLVED',
+      },
+    });
+
+    const response = await request(app.getHttpServer())
+      .get('/threat-alerts')
+      .expect(200);
+
+    expect(response.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: pending.id,
+          threatLevel: 1,
+          latitude: 35.1,
+          longitude: 139.1,
+          status: 'PENDING',
+          squadId: null,
+          createdAt: pending.createdAt.toISOString(),
+        }),
+        expect.objectContaining({
+          id: resolved.id,
+          threatLevel: 3,
+          latitude: 35.2,
+          longitude: 139.2,
+          status: 'RESOLVED',
+          squadId: null,
+          createdAt: resolved.createdAt.toISOString(),
+        }),
+      ]),
+    );
+  });
+
+  it('returns an alert with its stored details by identity', async () => {
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 2, latitude: 35.3, longitude: 139.3 },
+    });
+
+    await request(app.getHttpServer())
+      .get(`/threat-alerts/${alert.id}`)
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body).toEqual({
+          id: alert.id,
+          threatLevel: 2,
+          latitude: 35.3,
+          longitude: 139.3,
+          status: 'PENDING',
+          squadId: null,
+          createdAt: alert.createdAt.toISOString(),
+        });
+      });
+  });
+
+  it('returns a safe shared not-found response for an absent identity', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/threat-alerts/does-not-exist')
+      .expect(404);
+
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        code: 'NOT_FOUND',
+      }),
+    );
+    const responseBody = response.body as { message: unknown };
+    expect(typeof responseBody.message).toBe('string');
+    expect(JSON.stringify(response.body)).not.toMatch(/prisma|database|sql/i);
+  });
 });
