@@ -167,3 +167,120 @@ describe('SquadsService roster and lookup', () => {
     expect(get).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('SquadsService update and removal', () => {
+  const existingSquad = {
+    id: 'existing-squad-id',
+    number: 11,
+    captainName: 'Shunsui Kyoraku',
+    isAvailable: true,
+    maxThreatLevel: 3,
+    currentLat: 35.6895,
+    currentLng: 139.6917,
+  };
+
+  type SquadUpdater = {
+    update(
+      id: string,
+      data: Record<string, unknown>,
+    ): Promise<typeof existingSquad | null>;
+    markUnavailable(id: string): Promise<typeof existingSquad | null>;
+  };
+
+  type MutableSquadsService = SquadsService & {
+    update(
+      id: string,
+      data: Record<string, unknown>,
+    ): Promise<typeof existingSquad>;
+    remove(id: string): Promise<typeof existingSquad>;
+  };
+
+  let update: jest.MockedFunction<SquadUpdater['update']>;
+  let markUnavailable: jest.MockedFunction<SquadUpdater['markUnavailable']>;
+  let service: MutableSquadsService;
+
+  beforeEach(() => {
+    update = jest.fn();
+    markUnavailable = jest.fn();
+    service = new SquadsService({
+      update,
+      markUnavailable,
+    } as unknown as SquadsRepository);
+  });
+
+  it('T028: preserves omitted fields when partially updating a squad', async () => {
+    const patch = {
+      captainName: 'Soi Fon',
+      currentLat: 34.6937,
+    };
+    const updatedSquad = {
+      ...existingSquad,
+      ...patch,
+    };
+    update.mockResolvedValue(updatedSquad);
+
+    await expect(service.update(existingSquad.id, patch)).resolves.toEqual(
+      updatedSquad,
+    );
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith(existingSquad.id, patch);
+  });
+
+  it('T028: reports a client-safe not-found outcome when updating a missing squad', async () => {
+    const patch = { captainName: 'Soi Fon' };
+    update.mockResolvedValue(null);
+
+    let thrown: unknown;
+    try {
+      await service.update('missing-squad-id', patch);
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(NotFoundError);
+    expect(thrown).toMatchObject({
+      code: 'NOT_FOUND',
+      statusCode: 404,
+    });
+    expect(thrown).toHaveProperty('message', expect.any(String));
+    expect((thrown as Error).message).not.toContain('Prisma');
+    expect(update).toHaveBeenCalledWith('missing-squad-id', patch);
+    expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it('T028: marks a squad unavailable when removing it', async () => {
+    const removedSquad = {
+      ...existingSquad,
+      isAvailable: false,
+    };
+    markUnavailable.mockResolvedValue(removedSquad);
+
+    await expect(service.remove(existingSquad.id)).resolves.toEqual(
+      removedSquad,
+    );
+    expect(markUnavailable).toHaveBeenCalledTimes(1);
+    expect(markUnavailable).toHaveBeenCalledWith(existingSquad.id);
+  });
+
+  it('T028: reports a client-safe not-found outcome when removing a missing squad', async () => {
+    markUnavailable.mockResolvedValue(null);
+
+    let thrown: unknown;
+    try {
+      await service.remove('missing-squad-id');
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(NotFoundError);
+    expect(thrown).toMatchObject({
+      code: 'NOT_FOUND',
+      statusCode: 404,
+    });
+    expect(thrown).toHaveProperty('message', expect.any(String));
+    expect((thrown as Error).message).not.toContain('Prisma');
+    expect(markUnavailable).toHaveBeenCalledWith('missing-squad-id');
+    expect(markUnavailable).toHaveBeenCalledTimes(1);
+  });
+
+});
