@@ -221,7 +221,7 @@ describe('List squads API (e2e)', () => {
     await prisma.$disconnect();
   });
 
-  it('returns all squads in the roster, including unavailable squads', async () => {
+  it('BR-01 returns all squads in the roster, including unavailable squads', async () => {
     const squads = await seedSquads(prisma, [
       {
         number: 1,
