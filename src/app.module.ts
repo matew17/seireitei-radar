@@ -1,13 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { DomainExceptionFilter } from './common/filters/domain-exception.filter';
+import type { ValidationError as ClassValidationError } from 'class-validator';
 import { ValidationError } from './common/errors/domain-error';
+import { DomainExceptionFilter } from './common/filters/domain-exception.filter';
 import { PrismaModule } from './prisma/prisma.module';
 import { SquadsModule } from './squads/squads.module';
-import type { ValidationError as ClassValidationError } from 'class-validator';
 
 function formatValidationMessages(errors: ClassValidationError[]): string {
   const messages = errors.flatMap((error) =>
@@ -19,9 +16,8 @@ function formatValidationMessages(errors: ClassValidationError[]): string {
 
 @Module({
   imports: [PrismaModule, SquadsModule],
-  controllers: [AppController],
+  controllers: [],
   providers: [
-    AppService,
     {
       provide: APP_PIPE,
       useFactory: () =>
