@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ConflictError } from '../common/errors/domain-error';
+import { ConflictError, NotFoundError } from '../common/errors/domain-error';
 import type { Prisma, Squad } from '../../generated/prisma/client';
 import { SquadsRepository } from './squads.repository';
 
@@ -17,6 +17,20 @@ export class SquadsService {
 
       throw error;
     }
+  }
+
+  async list(): Promise<Squad[]> {
+    return this.squadsRepository.list();
+  }
+
+  async get(id: string): Promise<Squad> {
+    const squad = await this.squadsRepository.get(id);
+
+    if (!squad) {
+      throw new NotFoundError(`Squad ${id} not found`);
+    }
+
+    return squad;
   }
 
   private isUniqueConstraintError(
