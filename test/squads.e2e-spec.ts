@@ -307,3 +307,70 @@ describe('Get squad API (e2e)', () => {
     });
   });
 });
+
+describe('Update squad API (e2e)', () => {
+  const prisma = new PrismaClient();
+  let app: INestApplication<App>;
+
+  beforeAll(async () => {
+    await prisma.$connect();
+
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  beforeEach(async () => {
+    await clearSquads(prisma);
+  });
+
+  afterAll(async () => {
+    await app.close();
+    await prisma.$disconnect();
+  });
+
+  it('T025: partially updates a squad while preserving omitted fields', async () => {
+    const [squad] = await seedSquads(prisma, [
+      {
+        number: 1,
+        captainName: 'Genryusai Shigekuni Yamamoto',
+        isAvailable: false,
+        maxThreatLevel: 3,
+        currentLat: 35.6762,
+        currentLng: 139.6503,
+      },
+    ]);
+
+    const response = await request(app.getHttpServer())
+      .patch(`/squads/${squad.id}`)
+      .send({
+        captainName: 'Shunsui Kyoraku',
+        currentLat: 35.6895,
+      })
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      id: squad.id,
+      number: 1,
+      captainName: 'Shunsui Kyoraku',
+      isAvailable: false,
+      maxThreatLevel: 3,
+      currentLat: 35.6895,
+      currentLng: 139.6503,
+    });
+
+    await expect(
+      prisma.squad.findUnique({ where: { id: squad.id } }),
+    ).resolves.toMatchObject({
+      number: 1,
+      captainName: 'Shunsui Kyoraku',
+      isAvailable: false,
+      maxThreatLevel: 3,
+      currentLat: 35.6895,
+      currentLng: 139.6503,
+    });
+  });
+});
