@@ -86,3 +86,77 @@ describe('SquadsRepository roster and lookup', () => {
     });
   });
 });
+
+describe('SquadsRepository update and removal', () => {
+  const squad = {
+    id: 'squad-id',
+    number: 13,
+    captainName: 'Jushiro Ukitake',
+    isAvailable: true,
+    maxThreatLevel: 2,
+    currentLat: 35.6762,
+    currentLng: 139.6503,
+  };
+
+  type TransactionClient = {
+    squad: {
+      updateMany(input: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }): Promise<{ count: number }>;
+      findUnique(input: {
+        where: { id: string };
+      }): Promise<typeof squad | null>;
+    };
+  };
+
+  type TransactionCallback = (
+    tx: TransactionClient,
+  ) => Promise<typeof squad | null>;
+
+  const createTransaction = (prisma: TransactionClient) =>
+    jest.fn((callback: TransactionCallback) => callback(prisma));
+
+  it('updates only the supplied fields and returns the updated record', async () => {
+    const data = { currentLat: 35.7, isAvailable: false };
+    const updatedSquad = { ...squad, ...data };
+    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const findUnique = jest.fn().mockResolvedValue(updatedSquad);
+    const prisma = { squad: { updateMany, findUnique } };
+    const transaction = createTransaction(prisma);
+    const repository = new SquadsRepository({
+      ...prisma,
+      $transaction: transaction,
+    } as never);
+
+    await expect(repository.update(squad.id, data)).resolves.toEqual(
+      updatedSquad,
+    );
+    expect(updateMany).toHaveBeenCalledTimes(1);
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { id: squad.id },
+      data,
+    });
+  });
+
+  it('marks the squad unavailable without deleting it', async () => {
+    const unavailableSquad = { ...squad, isAvailable: false };
+    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const findUnique = jest.fn().mockResolvedValue(unavailableSquad);
+    const prisma = { squad: { updateMany, findUnique } };
+    const transaction = createTransaction(prisma);
+    const repository = new SquadsRepository({
+      ...prisma,
+      $transaction: transaction,
+    } as never);
+
+    await expect(repository.markUnavailable(squad.id)).resolves.toEqual(
+      unavailableSquad,
+    );
+    expect(updateMany).toHaveBeenCalledTimes(1);
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { id: squad.id },
+      data: { isAvailable: false },
+    });
+  });
+});

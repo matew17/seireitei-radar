@@ -19,4 +19,30 @@ export class SquadsRepository {
       where: { id },
     });
   }
+
+  async update(
+    id: string,
+    data: Prisma.SquadUpdateManyMutationInput,
+  ): Promise<Squad | null> {
+    return this.prisma.$transaction(async (tx) => {
+      const result = await tx.squad.updateMany({
+        where: { id },
+        data,
+      });
+
+      if (result.count === 0) {
+        return null;
+      }
+
+      return tx.squad.findUnique({
+        where: { id },
+      });
+    });
+  }
+
+  async markUnavailable(id: string): Promise<Squad | null> {
+    return this.update(id, {
+      isAvailable: false,
+    });
+  }
 }
