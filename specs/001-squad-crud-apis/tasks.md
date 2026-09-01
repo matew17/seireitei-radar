@@ -59,8 +59,8 @@
 
 - [x] T015 [P] [US1] Create create DTO with class-validator rules in `src/squads/dto/create-squad.dto.ts`
 - [x] T016 [US1] Implement Squad create persistence methods in `src/squads/squads.repository.ts`
-- [ ] T017 [US1] Implement Squad create business flow and Prisma-error translation in `src/squads/squads.service.ts`
-- [ ] T018 [US1] Implement `POST /squads` endpoint mapping in `src/squads/squads.controller.ts`
+- [x] T017 [US1] Implement Squad create business flow and Prisma-error translation in `src/squads/squads.service.ts`
+- [x] T018 [US1] Implement `POST /squads` endpoint mapping in `src/squads/squads.controller.ts`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -74,14 +74,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T019 [P] [US2] Add list squads e2e test covering unavailable squads in `test/squads.e2e-spec.ts`
-- [ ] T020 [P] [US2] Add get squad e2e tests for found and not-found outcomes in `test/squads.e2e-spec.ts`
-- [ ] T021 [P] [US2] Add service unit tests for roster and lookup behavior in `src/squads/squads.service.spec.ts`
+- [x] T019 [P] [US2] Add list squads e2e test covering unavailable squads in `test/squads.e2e-spec.ts`
+- [x] T020 [P] [US2] Add get squad e2e tests for found and not-found outcomes in `test/squads.e2e-spec.ts`
+- [x] T021 [P] [US2] Add service unit tests for roster and lookup behavior in `src/squads/squads.service.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T022 [US2] Implement Squad list and find-by-id repository methods in `src/squads/squads.repository.ts`
-- [ ] T023 [US2] Implement Squad list and get service methods with not-found domain errors in `src/squads/squads.service.ts`
+- [x] T022 [US2] Implement Squad list and find-by-id repository methods in `src/squads/squads.repository.ts`
+- [x] T023 [US2] Implement Squad list and get service methods with not-found domain errors in `src/squads/squads.service.ts`
 - [ ] T024 [US2] Implement `GET /squads` and `GET /squads/:id` endpoint mappings in `src/squads/squads.controller.ts`
 
 **Checkpoint**: User Story 2 is independently functional and testable.
