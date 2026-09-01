@@ -373,4 +373,56 @@ describe('Update squad API (e2e)', () => {
       currentLng: 139.6503,
     });
   });
+
+  it('BR-02 (T026): rejects a patch request that reuses another squad number and preserves the stored squad', async () => {
+    const [squad, conflictingSquad] = await seedSquads(prisma, [
+      {
+        number: 1,
+        captainName: 'Genryusai Shigekuni Yamamoto',
+        isAvailable: false,
+        maxThreatLevel: 3,
+        currentLat: 35.6762,
+        currentLng: 139.6503,
+      },
+      {
+        number: 2,
+        captainName: 'Shunsui Kyoraku',
+        isAvailable: true,
+        maxThreatLevel: 2,
+        currentLat: 35.6895,
+        currentLng: 139.6917,
+      },
+    ]);
+
+    await request(app.getHttpServer())
+      .patch(`/squads/${squad.id}`)
+      .send({ number: conflictingSquad.number })
+      .expect(409);
+
+    await expect(
+      prisma.squad.findUnique({ where: { id: squad.id } }),
+    ).resolves.toMatchObject(squad);
+  });
+
+  it('BR-03 (T026): rejects a patch request with an invalid maxThreatLevel and preserves the stored squad', async () => {
+    const [squad] = await seedSquads(prisma, [
+      {
+        number: 1,
+        captainName: 'Genryusai Shigekuni Yamamoto',
+        isAvailable: false,
+        maxThreatLevel: 3,
+        currentLat: 35.6762,
+        currentLng: 139.6503,
+      },
+    ]);
+
+    await request(app.getHttpServer())
+      .patch(`/squads/${squad.id}`)
+      .send({ maxThreatLevel: 4 })
+      .expect(400);
+
+    await expect(
+      prisma.squad.findUnique({ where: { id: squad.id } }),
+    ).resolves.toMatchObject(squad);
+  });
 });
