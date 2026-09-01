@@ -1,4 +1,4 @@
-import { ConflictError } from '../common/errors/domain-error';
+import { ConflictError, NotFoundError } from '../common/errors/domain-error';
 import { SquadsRepository } from './squads.repository';
 import { SquadsService } from './squads.service';
 
@@ -86,5 +86,84 @@ describe('SquadsService create', () => {
       'Prisma internal unique constraint details',
     );
     expect(create).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('SquadsService roster and lookup', () => {
+  const availableSquad = {
+    id: 'available-squad-id',
+    number: 1,
+    captainName: 'Genryusai Shigekuni Yamamoto',
+    isAvailable: true,
+    maxThreatLevel: 3,
+    currentLat: 35.6762,
+    currentLng: 139.6503,
+  };
+  const unavailableSquad = {
+    ...availableSquad,
+    id: 'unavailable-squad-id',
+    number: 2,
+    captainName: 'Retsu Unohana',
+    isAvailable: false,
+  };
+
+  type SquadRecord = typeof availableSquad;
+
+  type RosterReader = {
+    list(): Promise<SquadRecord[]>;
+    get(id: string): Promise<SquadRecord | null>;
+  };
+
+  let list: jest.MockedFunction<RosterReader['list']>;
+  let get: jest.MockedFunction<RosterReader['get']>;
+  let service: RosterReader;
+
+  beforeEach(() => {
+    list = jest.fn();
+    get = jest.fn();
+    service = new SquadsService({
+      list,
+      get,
+    } as unknown as SquadsRepository);
+  });
+
+  it('returns the complete roster, including unavailable squads', async () => {
+    list.mockResolvedValue([availableSquad, unavailableSquad]);
+
+    await expect(service.list()).resolves.toEqual([
+      availableSquad,
+      unavailableSquad,
+    ]);
+    expect(list).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns the requested squad by identity', async () => {
+    get.mockResolvedValue(unavailableSquad);
+
+    await expect(service.get(unavailableSquad.id)).resolves.toEqual(
+      unavailableSquad,
+    );
+    expect(get).toHaveBeenCalledWith(unavailableSquad.id);
+  });
+
+  it('reports a client-safe not-found outcome for an unknown identity', async () => {
+    get.mockResolvedValue(null);
+
+    let thrown: unknown;
+    try {
+      await service.get('missing-squad-id');
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(NotFoundError);
+    expect(thrown).toMatchObject({
+      code: 'NOT_FOUND',
+      statusCode: 404,
+    });
+    expect(thrown).toHaveProperty('message', expect.any(String));
+    expect((thrown as Error).message).not.toContain('Prisma');
+    expect(get).toHaveBeenCalledWith('missing-squad-id');
+    expect(get).toHaveBeenCalledTimes(1);
   });
 });
