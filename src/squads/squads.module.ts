@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { SquadsController } from './controllers/squads.controller';
-import { SquadsRepository } from './squads.repository';
+import { SquadsRepository } from './repositories/squads.repository';
 import { SquadsService } from './services/squads.service';
 
 @Module({

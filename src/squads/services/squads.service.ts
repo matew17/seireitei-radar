@@ -5,7 +5,7 @@ import {
   ValidationError,
 } from '../../common/errors/domain-error';
 import type { Prisma, Squad } from '../../../generated/prisma/client';
-import { SquadsRepository } from '../squads.repository';
+import { SquadsRepository } from '../repositories/squads.repository';
 
 @Injectable()
 export class SquadsService {

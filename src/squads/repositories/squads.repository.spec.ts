@@ -1,4 +1,4 @@
-jest.mock('../prisma/prisma.service', () => ({
+jest.mock('../../prisma/prisma.service', () => ({
   PrismaService: class PrismaService {},
 }));
 
