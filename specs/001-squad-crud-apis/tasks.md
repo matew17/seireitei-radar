@@ -122,7 +122,7 @@
 - [x] T036 Run `npm run lint` and fix any reported issues in touched files
 - [x] T037 Run `npm test` and fix any reported issues in touched files
 - [x] T038 Run `npm run test:e2e` against real PostgreSQL and fix any reported issues in touched files
-- [ ] T039 Run `npm run build` and fix any reported issues in touched files
+- [x] T039 Run `npm run build` and fix any reported issues in touched files
 - [x] T040 Validate `specs/001-squad-crud-apis/quickstart.md` end-to-end and update only if observed behavior differs from the approved spec
 
 ---
