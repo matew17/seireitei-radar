@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: ThreatAlert CRUD APIs
+  version: 0.1.0
+paths:
+  /threat-alerts:
+    post:
+      summary: Create a threat alert
+      operationId: createThreatAlert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateThreatAlertRequest'
+      responses:
+        '201':
+          description: Threat alert created pending and unassigned; BR-01 eligibility lookup executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreatAlert'
+        '400':
+          description: Invalid alert input, including BR-04 violations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List all threat alerts
+      operationId: listThreatAlerts
+      responses:
+        '200':
+          description: All threat alerts, including resolved alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ThreatAlert'
+  /threat-alerts/{id}:
+    get:
+      summary: Get a threat alert by identity
+      operationId: getThreatAlert
+      parameters:
+        - $ref: '#/components/parameters/ThreatAlertId'
+      responses:
+        '200':
+          description: Threat alert found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreatAlert'
+        '404':
+          description: Threat alert not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Correct a threat alert's severity or location
+      operationId: updateThreatAlert
+      parameters:
+        - $ref: '#/components/parameters/ThreatAlertId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateThreatAlertRequest'
+      responses:
+        '200':
+          description: Threat alert updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreatAlert'
+        '400':
+          description: Invalid alert input, including BR-04 violations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Threat alert not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Mark a threat alert resolved
+      operationId: removeThreatAlert
+      parameters:
+        - $ref: '#/components/parameters/ThreatAlertId'
+      responses:
+        '200':
+          description: Threat alert marked resolved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreatAlert'
+        '404':
+          description: Threat alert not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  parameters:
+    ThreatAlertId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    ThreatAlert:
+      type: object
+      required:
+        - id
+        - threatLevel
+        - latitude
+        - longitude
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+        threatLevel:
+          type: integer
+          enum: [1, 2, 3]
+        latitude:
+          type: number
+        longitude:
+          type: number
+        status:
+          type: string
+          enum: [PENDING, ASSIGNED, RESOLVED]
+        squadId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    CreateThreatAlertRequest:
+      type: object
+      required:
+        - threatLevel
+        - latitude
+        - longitude
+      properties:
+        threatLevel:
+          type: integer
+          enum: [1, 2, 3]
+        latitude:
+          type: number
+        longitude:
+          type: number
+    UpdateThreatAlertRequest:
+      type: object
+      minProperties: 1
+      properties:
+        threatLevel:
+          type: integer
+          enum: [1, 2, 3]
+        latitude:
+          type: number
+        longitude:
+          type: number
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: string
