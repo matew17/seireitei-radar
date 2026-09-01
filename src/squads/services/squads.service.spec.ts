@@ -1,8 +1,8 @@
-import { ConflictError, NotFoundError } from '../common/errors/domain-error';
-import { SquadsRepository } from './squads.repository';
+import { ConflictError, NotFoundError } from '../../common/errors/domain-error';
+import { SquadsRepository } from '../squads.repository';
 import { SquadsService } from './squads.service';
 
-jest.mock('./squads.repository', () => ({
+jest.mock('../squads.repository', () => ({
   SquadsRepository: class SquadsRepository {},
 }));
 
