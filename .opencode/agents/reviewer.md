@@ -2,15 +2,15 @@
 description: Reviews a diff against the spec and constitution. Use only after lint, typecheck, tests and build pass.
 mode: subagent
 model: openai/gpt-5.4-mini
-variant: high
+variant: medium
 permission:
   edit: deny
   bash:
-    "*": deny
-    "git diff *": allow
-    "git log *": allow
-    "git status *": allow
-    "grep *": allow
+    '*': deny
+    'git diff *': allow
+    'git log *': allow
+    'git status *': allow
+    'grep *': allow
 ---
 
 Review the current diff. Read-only: never edit files.

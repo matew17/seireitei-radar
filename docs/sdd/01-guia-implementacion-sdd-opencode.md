@@ -12,31 +12,32 @@ Hazlos en orden. Cada paso se verifica solo, sin depender del siguiente.
 > `<PROYECTO>`, `<DOMINIO>`, `<ENTIDAD>` o reglas `BR-xx` de ejemplo,
 > reemplázalos por las decisiones de tu demo. El stack base sí es fijo:
 > **NestJS + TypeScript + Prisma + PostgreSQL**.
+
 ---
 
 ## Mapa de equivalencias Claude Code → opencode
 
-| Concepto Claude Code            | Equivalente opencode                                              |
-| ------------------------------- | ----------------------------------------------------------------- |
-| `CLAUDE.md`                     | `AGENTS.md` (opencode también lee `CLAUDE.md` como fallback)      |
-| `.claude/settings.json`         | `opencode.json` (`$schema: https://opencode.ai/config.json`)      |
-| `permissions` (allow/ask/deny)  | `permission` en `opencode.json` — con globs por comando bash      |
-| Hooks (`PreToolUse`, etc.)      | Plugins TS en `.opencode/plugins/` (`tool.execute.before/after`)  |
-| `.claude/agents/*.md`           | `.opencode/agents/*.md` (`mode: subagent`, `permission:`)         |
-| `.claude/commands/*.md`         | `.opencode/commands/*.md` (template + `$ARGUMENTS`)               |
-| SlashCommand tool (encadenar)   | No existe → "Read `.opencode/commands/x.md` and follow it"        |
-| `Stop` hook (telemetría)        | Plugin con hook `event` escuchando `session.idle`                 |
-| `SubagentStop` hook             | No hay evento nativo → el gate corre como paso del comando        |
-| Spec Kit `--integration claude` | `specify init . --ai opencode`                                    |
+| Concepto Claude Code            | Equivalente opencode                                             |
+| ------------------------------- | ---------------------------------------------------------------- |
+| `CLAUDE.md`                     | `AGENTS.md` (opencode también lee `CLAUDE.md` como fallback)     |
+| `.claude/settings.json`         | `opencode.json` (`$schema: https://opencode.ai/config.json`)     |
+| `permissions` (allow/ask/deny)  | `permission` en `opencode.json` — con globs por comando bash     |
+| Hooks (`PreToolUse`, etc.)      | Plugins TS en `.opencode/plugins/` (`tool.execute.before/after`) |
+| `.claude/agents/*.md`           | `.opencode/agents/*.md` (`mode: subagent`, `permission:`)        |
+| `.claude/commands/*.md`         | `.opencode/commands/*.md` (template + `$ARGUMENTS`)              |
+| SlashCommand tool (encadenar)   | No existe → "Read `.opencode/commands/x.md` and follow it"       |
+| `Stop` hook (telemetría)        | Plugin con hook `event` escuchando `session.idle`                |
+| `SubagentStop` hook             | No hay evento nativo → el gate corre como paso del comando       |
+| Spec Kit `--integration claude` | `specify init . --ai opencode`                                   |
 
 **Diferencias honestas para la charla:**
 
 1. **Los permisos nativos de opencode son más fuertes que los hooks de Claude
    para patrones estáticos.** `permission.bash` con `"git push *": "deny"` es
-   config declarativa, no un script. Para chequeos *dinámicos* (¿en qué rama
+   config declarativa, no un script. Para chequeos _dinámicos_ (¿en qué rama
    estoy? ¿hay migración nueva?) necesitas un plugin.
 2. **Los hooks son TypeScript, no bash+JSON.** Un plugin lanza `throw new
-   Error(...)` para bloquear — el error le llega al agente como razón.
+Error(...)` para bloquear — el error le llega al agente como razón.
 3. **Multi-proveedor real.** `opencode auth login` conecta OpenCode Zen,
    OpenRouter, GitHub Copilot, ChatGPT Plus, Anthropic API o modelos locales.
    Además puedes asignar **un modelo distinto por agente**: uno general para
@@ -48,27 +49,27 @@ Hazlos en orden. Cada paso se verifica solo, sin depender del siguiente.
 
 ## Índice
 
-| #   | Paso                             | Práctica demostrada                     |
-| --- | -------------------------------- | --------------------------------------- |
-| 0   | Prerrequisitos y estructura      | —                                       |
-| 1   | `AGENTS.md`                      | Ownership boundaries                    |
-| 2   | Instalar Spec Kit                | Spec-driven development                 |
-| 3   | Constitution                     | Single source of truth                  |
-| 4   | Reglas de negocio con ID         | Traceability                            |
-| 5   | `.sdd/config.json`               | Degrees of freedom                      |
-| 6   | Permisos nativos + `git-guard`   | Determinism boundary · Defense in depth |
-| 7   | Plugin `fast-check` + gate       | Validator loop                          |
-| 8   | Plugin `prisma-guard`            | Deterministic gates                     |
-| 9   | Plugin `telemetry`               | Eval-driven development                 |
-| 10  | Agente `implementer`             | Blast radius limiting                   |
-| 11  | Agente `test-writer`             | Independencia spec↔código               |
-| 12  | Agente `reviewer`                | Judgment agents                         |
-| 13  | Comando `/sdd-new`               | Orquestación de comandos                |
-| 14  | Comando `/sdd-implement`         | Loop con escalada                       |
-| 15  | Comando `/sdd-ship`              | Traceability end-to-end                 |
-| 16  | Comando `/sdd-status`            | Observabilidad                          |
-| 17  | Template de PR                   | Traceability                            |
-| 18  | Branch protection                | Defense in depth                        |
+| #   | Paso                           | Práctica demostrada                     |
+| --- | ------------------------------ | --------------------------------------- |
+| 0   | Prerrequisitos y estructura    | —                                       |
+| 1   | `AGENTS.md`                    | Ownership boundaries                    |
+| 2   | Instalar Spec Kit              | Spec-driven development                 |
+| 3   | Constitution                   | Single source of truth                  |
+| 4   | Reglas de negocio con ID       | Traceability                            |
+| 5   | `.sdd/config.json`             | Degrees of freedom                      |
+| 6   | Permisos nativos + `git-guard` | Determinism boundary · Defense in depth |
+| 7   | Plugin `fast-check` + gate     | Validator loop                          |
+| 8   | Plugin `prisma-guard`          | Deterministic gates                     |
+| 9   | Plugin `telemetry`             | Eval-driven development                 |
+| 10  | Agente `implementer`           | Blast radius limiting                   |
+| 11  | Agente `test-writer`           | Independencia spec↔código               |
+| 12  | Agente `reviewer`              | Judgment agents                         |
+| 13  | Comando `/sdd-new`             | Orquestación de comandos                |
+| 14  | Comando `/sdd-implement`       | Loop con escalada                       |
+| 15  | Comando `/sdd-ship`            | Traceability end-to-end                 |
+| 16  | Comando `/sdd-status`          | Observabilidad                          |
+| 17  | Template de PR                 | Traceability                            |
+| 18  | Branch protection              | Defense in depth                        |
 
 ---
 
@@ -78,7 +79,7 @@ Hazlos en orden. Cada paso se verifica solo, sin depender del siguiente.
 
 **Contenido.**
 
-```bash
+````bash
 # Instala opencode
 curl -fsSL https://opencode.ai/install | bash
 opencode --version
@@ -86,7 +87,7 @@ opencode --version
 # SI aca dice que opencode no se reconoce, trata de incluirlo en tu PATH
 ```bash
 echo 'export PATH="/Users/<your-username>/.opencode/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
-```
+````
 
 ### Autentica al menos un proveedor (elige el tuyo)
 
@@ -94,7 +95,7 @@ opencode auth login
 
 ### Verifica
 
-node -v        # 20+
+node -v # 20+
 gh auth status # autenticado
 git branch --show-current
 
@@ -183,7 +184,7 @@ Never push to main. Never use `--no-verify`.
 
 **Verificación.** Menos de 30 líneas. Si crece, algo pertenece a otra capa.
 
-**Práctica.** *Ownership boundaries* — reglas globales aquí, procedimiento en
+**Práctica.** _Ownership boundaries_ — reglas globales aquí, procedimiento en
 comandos, criterio en agentes.
 
 ---
@@ -204,7 +205,7 @@ uvx --from git+https://github.com/github/spec-kit.git specify init . --integrati
 
 > Si tu versión no lista `opencode`, corre `specify init --help` para ver las
 > integraciones disponibles y actualiza: `uvx --from
-> git+https://github.com/github/spec-kit.git specify --version`.
+git+https://github.com/github/spec-kit.git specify --version`.
 
 Deja:
 
@@ -220,7 +221,7 @@ git commit -m "chore: bootstrap spec kit"
 `speckit.specify`, `speckit.plan`, `speckit.tasks`, `speckit.analyze`,
 `speckit.clarify`, `speckit.implement`.
 
-**Práctica.** *Spec-driven development.*
+**Práctica.** _Spec-driven development._
 
 ---
 
@@ -287,7 +288,7 @@ Non-negotiable. Any violation blocks the work.
 **Verificación.** Cada principio es verificable — un revisor puede decidir
 sí/no. Si alguno no lo es, reescríbelo o bórralo.
 
-**Práctica.** *Single source of truth.*
+**Práctica.** _Single source of truth._
 
 ---
 
@@ -308,8 +309,8 @@ dominio, pero **conserva un ejemplo de cada tipo**:
 
 Stable IDs. Never renumber. Deprecate instead.
 
-| ID    | Rule                                                            | Enforced at                      |
-| ----- | --------------------------------------------------------------- | -------------------------------- |
+| ID    | Rule                                                              | Enforced at                      |
+| ----- | ----------------------------------------------------------------- | -------------------------------- |
 | BR-01 | <invariante de concurrencia — ej: no double-booking, no oversell> | DB constraint + integration test |
 | BR-02 | <regla de formato/rango — ej: duración, límites de entrada>       | DTO + unit test                  |
 | BR-03 | <regla de estado — ej: cancelación, transición inválida>          | Service + unit test              |
@@ -328,11 +329,11 @@ invariante de concurrencia real (cupo, unicidad, traslape). Es lo que justifica
 el principio II de la constitution y permite mostrar el prisma-guard + un test
 de integración contra Postgres real — la cadena de trazabilidad más completa.
 
-**Verificación.** Cada regla declara *dónde* se hace cumplir. Si alguna dice
+**Verificación.** Cada regla declara _dónde_ se hace cumplir. Si alguna dice
 "en el service" pero involucra concurrencia, está mal clasificada — revísala
 contra el principio II de la constitution.
 
-**Práctica.** *Traceability.*
+**Práctica.** _Traceability._
 
 ---
 
@@ -369,7 +370,7 @@ todos los modos; lo demás se calibra.
 
 **Verificación.** `jq . .sdd/config.json` parsea sin error.
 
-**Práctica.** *Degrees of freedom* — libertad calibrada explícitamente, no
+**Práctica.** _Degrees of freedom_ — libertad calibrada explícitamente, no
 implícita.
 
 > **Nota opencode:** además de esto, opencode tiene `--auto` (auto-aprueba lo
@@ -416,37 +417,39 @@ parado en main? ¿hay una migración nueva?).
 **Capa 2 — plugin para chequeos dinámicos** — `.opencode/plugins/git-guard.ts`:
 
 ```typescript
-import type { Plugin } from "@opencode-ai/plugin"
+import type { Plugin } from '@opencode-ai/plugin';
 
 const BLOCKED = [
-  { re: /\bDROP\s+TABLE/i, why: "Destructive database operation blocked." },
-  { re: /\bTRUNCATE\b/i, why: "Destructive database operation blocked." },
-  { re: /prisma\s+migrate\s+reset/, why: "Destructive database operation blocked." },
-]
+  { re: /\bDROP\s+TABLE/i, why: 'Destructive database operation blocked.' },
+  { re: /\bTRUNCATE\b/i, why: 'Destructive database operation blocked.' },
+  {
+    re: /prisma\s+migrate\s+reset/,
+    why: 'Destructive database operation blocked.',
+  },
+];
 
 export const GitGuard: Plugin = async ({ $ }) => {
   return {
-    "tool.execute.before": async (input, output) => {
-      if (input.tool !== "bash") return
-      const cmd: string = output.args.command ?? ""
+    'tool.execute.before': async (input, output) => {
+      if (input.tool !== 'bash') return;
+      const cmd: string = output.args.command ?? '';
 
       for (const { re, why } of BLOCKED) {
-        if (re.test(cmd)) throw new Error(why)
+        if (re.test(cmd)) throw new Error(why);
       }
 
       // Push estando parado en main — chequeo dinámico, imposible con un glob
       if (/\bgit\s+push\b/.test(cmd)) {
-        const branch =
-          (await $`git rev-parse --abbrev-ref HEAD`.text()).trim()
-        if (branch === "main" || branch === "master") {
+        const branch = (await $`git rev-parse --abbrev-ref HEAD`.text()).trim();
+        if (branch === 'main' || branch === 'master') {
           throw new Error(
-            `Current branch is ${branch}. Create a feature branch before pushing.`
-          )
+            `Current branch is ${branch}. Create a feature branch before pushing.`,
+          );
         }
       }
     },
-  }
-}
+  };
+};
 ```
 
 > **Nota de diseño:** en opencode, bloquear = `throw new Error("razón")`. La
@@ -464,7 +467,7 @@ export const GitGuard: Plugin = async ({ $ }) => {
 # El plugin debe bloquearlo con el nombre de la rama en el mensaje.
 ```
 
-**Práctica.** *Determinism boundary* — esto no puede ser una instrucción en un
+**Práctica.** _Determinism boundary_ — esto no puede ser una instrucción en un
 prompt porque un prompt se puede ignorar; un permiso nativo o un plugin, no.
 Y en opencode tienes el bonus pedagógico: la mitad de la regla es una línea de
 JSON.
@@ -482,18 +485,18 @@ el caro corre cuando un subagente termina. Si corres la suite completa en cada
 **Contenido** — `.opencode/plugins/fast-check.ts`:
 
 ```typescript
-import type { Plugin } from "@opencode-ai/plugin"
+import type { Plugin } from '@opencode-ai/plugin';
 
 export const FastCheck: Plugin = async ({ $ }) => {
   return {
-    "tool.execute.after": async (input) => {
-      if (input.tool !== "edit" && input.tool !== "write") return
-      const file: string = input.args.filePath ?? ""
-      if (!file.endsWith(".ts")) return
-      await $`npx eslint --fix ${file}`.quiet().nothrow()
+    'tool.execute.after': async (input) => {
+      if (input.tool !== 'edit' && input.tool !== 'write') return;
+      const file: string = input.args.filePath ?? '';
+      if (!file.endsWith('.ts')) return;
+      await $`npx eslint --fix ${file}`.quiet().nothrow();
     },
-  }
-}
+  };
+};
 ```
 
 **Gate completo** — `scripts/quality-gate.sh`:
@@ -545,7 +548,7 @@ falló.
 > el modelo a veces interpreta el bloqueo como una negativa del usuario y se
 > detiene en vez de corregir.
 
-**Práctica.** *Validator loop* — generar → validar → corregir → repetir.
+**Práctica.** _Validator loop_ — generar → validar → corregir → repetir.
 
 ---
 
@@ -571,35 +574,35 @@ deploy que la base no tiene la columna.
 **Contenido** — `.opencode/plugins/prisma-guard.ts`:
 
 ```typescript
-import type { Plugin } from "@opencode-ai/plugin"
+import type { Plugin } from '@opencode-ai/plugin';
 
 export const PrismaGuard: Plugin = async ({ $ }) => {
   return {
-    "tool.execute.after": async (input) => {
-      if (input.tool !== "edit" && input.tool !== "write") return
-      const file: string = input.args.filePath ?? ""
-      if (!file.endsWith("schema.prisma")) return
+    'tool.execute.after': async (input) => {
+      if (input.tool !== 'edit' && input.tool !== 'write') return;
+      const file: string = input.args.filePath ?? '';
+      if (!file.endsWith('schema.prisma')) return;
 
       const schemaDiff =
-        await $`git diff --quiet -- prisma/schema.prisma`.nothrow()
-      if (schemaDiff.exitCode === 0) return
+        await $`git diff --quiet -- prisma/schema.prisma`.nothrow();
+      if (schemaDiff.exitCode === 0) return;
 
-      const status = await $`git status --porcelain prisma/migrations`.text()
+      const status = await $`git status --porcelain prisma/migrations`.text();
       const newMigrations = status
-        .split("\n")
-        .filter((l) => l.startsWith("??")).length
+        .split('\n')
+        .filter((l) => l.startsWith('??')).length;
 
       if (newMigrations === 0) {
         throw new Error(
-          "schema.prisma changed without a migration.\n" +
-            "Run: npx prisma migrate dev --name <descriptive_name>\n" +
-            "Constitution II: schema changes require a versioned migration " +
-            "in the same commit."
-        )
+          'schema.prisma changed without a migration.\n' +
+            'Run: npx prisma migrate dev --name <descriptive_name>\n' +
+            'Constitution II: schema changes require a versioned migration ' +
+            'in the same commit.',
+        );
       }
     },
-  }
-}
+  };
+};
 ```
 
 > `throw` dentro de `tool.execute.after` reporta la operación como fallida —
@@ -623,35 +626,35 @@ Nota: Agrega este nuevo plugin a la lista en opencode.json
 **Contenido** — `.opencode/plugins/telemetry.ts`:
 
 ```typescript
-import type { Plugin } from "@opencode-ai/plugin"
-import { appendFileSync, mkdirSync, readFileSync } from "node:fs"
+import type { Plugin } from '@opencode-ai/plugin';
+import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 
 export const Telemetry: Plugin = async ({ directory }) => {
   return {
     event: async ({ event }) => {
       // session.idle ≈ el hook Stop de Claude Code
-      if (event.type !== "session.idle") return
+      if (event.type !== 'session.idle') return;
 
-      let spec = "none"
+      let spec = 'none';
       try {
-        spec = readFileSync(`${directory}/.sdd/current-spec`, "utf-8").trim()
+        spec = readFileSync(`${directory}/.sdd/current-spec`, 'utf-8').trim();
       } catch {}
 
-      const runsDir = `${directory}/.sdd/runs`
-      mkdirSync(runsDir, { recursive: true })
+      const runsDir = `${directory}/.sdd/runs`;
+      mkdirSync(runsDir, { recursive: true });
 
-      const day = new Date().toISOString().slice(0, 10)
+      const day = new Date().toISOString().slice(0, 10);
       appendFileSync(
         `${runsDir}/${day}.jsonl`,
         JSON.stringify({
           ts: new Date().toISOString(),
           spec,
           event: event.type,
-        }) + "\n"
-      )
+        }) + '\n',
+      );
     },
-  }
-}
+  };
+};
 ```
 
 > opencode además expone `opencode stats` y el evento `message.updated` con
@@ -662,7 +665,7 @@ export const Telemetry: Plugin = async ({ directory }) => {
 **Verificación.** Después de una sesión, `.sdd/runs/<fecha>.jsonl` tiene
 líneas.
 
-**Práctica.** *Eval-driven development* — no puedes mejorar lo que no mides.
+**Práctica.** _Eval-driven development_ — no puedes mejorar lo que no mides.
 
 Nota: Agrega este nuevo plugin a la lista en opencode.json
 
@@ -682,14 +685,14 @@ el spec, que ya están en contexto.
 ---
 description: Implements exactly one task from tasks.md. Use after a task is selected and before tests are written.
 mode: subagent
-model: openai/gpt-5.3-codex-spark
+model: openai/gpt-5.6-terra
 variant: medium
 permission:
   edit: allow
   bash:
-    "*": allow
-    "git push *": deny
-    "gh pr *": deny
+    '*': allow
+    'git push *': deny
+    'gh pr *': deny
 ---
 
 Implement exactly one task.
@@ -721,14 +724,14 @@ The task is implemented and `npm run build` passes.
 ```
 
 > En opencode el control de herramientas es por `permission` (el campo `tools`
-> está deprecado). Aquí el implementer usa Codex Spark con razonamiento medio:
+> está deprecado). Aquí el implementer usa gpt terra con razonamiento medio:
 > es un modelo económico y enfocado en código para una sola task acotada. La
 > sesión principal conserva el modelo general más capaz para orquestar.
 
 **Verificación.** El archivo cabe en una pantalla. Si necesitas más, algo
 pertenece a la constitution.
 
-**Práctica.** *Blast radius limiting* + *progressive disclosure*.
+**Práctica.** _Blast radius limiting_ + _progressive disclosure_.
 
 ---
 
@@ -751,32 +754,32 @@ model: openai/gpt-5.4-mini
 variant: low
 permission:
   read:
-    "*": deny
-    "specs/**": allow
-    "docs/business-rules.md": allow
-    "**/*.spec.ts": allow
-    "**/*.test.ts": allow
-    "test/**": allow
-    "package.json": allow
-    "tsconfig*.json": allow
+    '*': deny
+    'specs/**': allow
+    'docs/business-rules.md': allow
+    '**/*.spec.ts': allow
+    '**/*.test.ts': allow
+    'test/**': allow
+    'package.json': allow
+    'tsconfig*.json': allow
   grep:
-    "*": deny
-    "specs/**": allow
-    "docs/business-rules.md": allow
-    "**/*.spec.ts": allow
-    "**/*.test.ts": allow
-    "test/**": allow
+    '*': deny
+    'specs/**': allow
+    'docs/business-rules.md': allow
+    '**/*.spec.ts': allow
+    '**/*.test.ts': allow
+    'test/**': allow
   edit:
-    "*": deny
-    "**/*.spec.ts": allow
-    "**/*.test.ts": allow
-    "test/**": allow
+    '*': deny
+    '**/*.spec.ts': allow
+    '**/*.test.ts': allow
+    'test/**': allow
   bash:
-    "*": deny
-    "npm test*": allow
-    "npm run test*": allow
-    "npx jest*": allow
-    "git status*": allow
+    '*': deny
+    'npm test*': allow
+    'npm run test*': allow
+    'npx jest*': allow
+    'git status*': allow
 ---
 
 Write tests for the given task from the specification.
@@ -842,11 +845,11 @@ variant: high
 permission:
   edit: deny
   bash:
-    "*": deny
-    "git diff *": allow
-    "git log *": allow
-    "git status *": allow
-    "grep *": allow
+    '*': deny
+    'git diff *': allow
+    'git log *': allow
+    'git status *': allow
+    'grep *': allow
 ---
 
 Review the current diff. Read-only: never edit files.
@@ -886,7 +889,7 @@ No praise. No suggestions outside the task scope.
 **Verificación.** Mete una violación obvia (lógica de negocio en un
 controller) y confirma que la detecta citando el principio I.
 
-**Práctica.** *Judgment agents vs deterministic gates.*
+**Práctica.** _Judgment agents vs deterministic gates._
 
 ---
 
@@ -913,21 +916,21 @@ Execute these steps in order. Stop immediately if any step reports a blocking
 problem — do not continue to the next.
 
 1. Read `.specify/memory/constitution.md` and `docs/business-rules.md`.
-    1.1. Determine whether the feature introduces new business rules.
+   1.1. Determine whether the feature introduces new business rules.
 
-    A business rule is a domain invariant that could be violated and must be
-    enforced somewhere. "Returns 200 on success" is not a rule. "No two active
-    bookings may overlap" is.
+   A business rule is a domain invariant that could be violated and must be
+   enforced somewhere. "Returns 200 on success" is not a rule. "No two active
+   bookings may overlap" is.
 
-    If the feature needs rules not yet in docs/business-rules.md:
+   If the feature needs rules not yet in docs/business-rules.md:
 
-    - Propose them with the next free BR-xx ids, stating where each is enforced
-    - Present them to the user and STOP
-    - Add them to docs/business-rules.md only after approval
-    - If a proposed rule replaces an existing one, mark the old one deprecated.
-    Never renumber.
+   - Propose them with the next free BR-xx ids, stating where each is enforced
+   - Present them to the user and STOP
+   - Add them to docs/business-rules.md only after approval
+   - If a proposed rule replaces an existing one, mark the old one deprecated.
+     Never renumber.
 
-    If no new rules are needed, say so and continue.
+   If no new rules are needed, say so and continue.
 
 2. Read `.opencode/commands/speckit.specify.md` and follow its instructions,
    passing the feature description enriched with the BR-xx rules that apply.
@@ -972,7 +975,7 @@ Then STOP. Spec approval is always human. Do not implement anything.
 preguntas de la regla ambigua que dejaste abierta en el paso 4, y no continuar
 hasta que respondas.
 
-**Práctica.** *Orquestación* + gate humano explícito.
+**Práctica.** _Orquestación_ + gate humano explícito.
 
 ---
 
@@ -1023,11 +1026,13 @@ If any fails, stop and report.
 7. Mark the task done in `tasks.md`.
 
 ## Limits
+
 - Stop after `maxTasksPerRun` tasks.
 - In `assisted` mode, confirm with the user before each task.
 - Never push. Never open a PR. That is `/sdd-ship`.
 
 ## Final output
+
 Tasks completed, tasks remaining, anything blocked.
 ```
 
@@ -1038,7 +1043,7 @@ Tasks completed, tasks remaining, anything blocked.
 **Verificación.** Corre con una sola task. Debe hacer un commit atómico con el
 BR-xx en el mensaje, y no hacer push.
 
-**Práctica.** *Escalation path* — un flujo semi-autónomo sin ruta de
+**Práctica.** _Escalation path_ — un flujo semi-autónomo sin ruta de
 recuperación no es semi-autónomo, es un flujo que te deja tirado.
 
 ---
@@ -1144,7 +1149,7 @@ Tokens: · USD: · Duration:
 
 **Qué.** La misma regla, en el servidor.
 
-**Por qué.** *Defense in depth.* Los permisos y plugins protegen del agente
+**Por qué.** _Defense in depth._ Los permisos y plugins protegen del agente
 pero son locales y se pueden borrar. La branch protection no.
 
 **Contenido.**
@@ -1184,10 +1189,10 @@ jobs:
   validate-pr:
     name: Lint, Test, and Build
     runs-on: ubuntu-latest
-    
+
     # Fake url generation so Prisma pass
     env:
-      DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy_db?schema=public"
+      DATABASE_URL: 'postgresql://dummy:dummy@localhost:5432/dummy_db?schema=public'
 
     steps:
       - name: Checkout Code
@@ -1231,29 +1236,29 @@ Cuando termines los 18 pasos, prueba el flujo completo con una feature real:
 **Regla de verificación general:** para cada capa, rómpela a propósito. Si no
 puedes hacerla fallar y ver cómo lo atrapa, no la controlas todavía.
 
-| Capa            | Cómo romperla                      | Qué debe pasar                        |
-| --------------- | ---------------------------------- | ------------------------------------- |
-| permisos nativos| `git push origin main`             | Deny instantáneo, sin ejecutar        |
-| git-guard       | `git push` parado en main          | Error del plugin con la rama          |
-| quality-gate    | `const x: number = "a"`            | Exit 2, el agente corrige             |
-| prisma-guard    | Editar schema sin migrar           | Error citando la constitution         |
-| test-writer     | Borrar una regla del service       | El test BR-xx falla                   |
-| reviewer        | Lógica de negocio en un controller | CHANGES_REQUESTED citando principio I |
-| escalada        | Forzar 3 rechazos                  | `.sdd/blocked.md` y detención         |
+| Capa             | Cómo romperla                      | Qué debe pasar                        |
+| ---------------- | ---------------------------------- | ------------------------------------- |
+| permisos nativos | `git push origin main`             | Deny instantáneo, sin ejecutar        |
+| git-guard        | `git push` parado en main          | Error del plugin con la rama          |
+| quality-gate     | `const x: number = "a"`            | Exit 2, el agente corrige             |
+| prisma-guard     | Editar schema sin migrar           | Error citando la constitution         |
+| test-writer      | Borrar una regla del service       | El test BR-xx falla                   |
+| reviewer         | Lógica de negocio en un controller | CHANGES_REQUESTED citando principio I |
+| escalada         | Forzar 3 rechazos                  | `.sdd/blocked.md` y detención         |
 
 ---
 
 ## Apéndice A — Lo que NO tiene equivalente directo (y cómo se resuelve)
 
-| Claude Code                    | Estado en opencode              | Solución                                                  |
-| ------------------------------ | ------------------------------- | --------------------------------------------------------- |
-| `PreToolUse` hook (bash/JSON)  | Plugin `tool.execute.before`    | Esta guía, paso 6 — `throw` para denegar                  |
-| `PostToolUse` hook             | Plugin `tool.execute.after`     | Esta guía, pasos 7 y 8                                    |
-| `SubagentStop` hook            | Sin evento nativo               | Gate como paso del comando `/sdd-implement` (paso 14)     |
-| `Stop` hook                    | Evento `session.idle`           | Esta guía, paso 9                                         |
-| SlashCommand tool (encadenar)  | No existe                       | Patrón "Read `.opencode/commands/x.md` and follow it"     |
-| `settings.json` + `hooks` key  | `opencode.json` + plugins TS    | Config declarativa para permisos; código para lo dinámico |
-| `allowed-tools` en frontmatter | `permission` en frontmatter     | Más granular: globs por comando, no solo lista de tools   |
+| Claude Code                    | Estado en opencode           | Solución                                                  |
+| ------------------------------ | ---------------------------- | --------------------------------------------------------- |
+| `PreToolUse` hook (bash/JSON)  | Plugin `tool.execute.before` | Esta guía, paso 6 — `throw` para denegar                  |
+| `PostToolUse` hook             | Plugin `tool.execute.after`  | Esta guía, pasos 7 y 8                                    |
+| `SubagentStop` hook            | Sin evento nativo            | Gate como paso del comando `/sdd-implement` (paso 14)     |
+| `Stop` hook                    | Evento `session.idle`        | Esta guía, paso 9                                         |
+| SlashCommand tool (encadenar)  | No existe                    | Patrón "Read `.opencode/commands/x.md` and follow it"     |
+| `settings.json` + `hooks` key  | `opencode.json` + plugins TS | Config declarativa para permisos; código para lo dinámico |
+| `allowed-tools` en frontmatter | `permission` en frontmatter  | Más granular: globs por comando, no solo lista de tools   |
 
 ## Apéndice B — Modelos y costo: resolver el límite de suscripción
 
@@ -1264,7 +1269,7 @@ La razón original de la migración. En opencode:
    Plus, Google, y servidores locales (Ollama/LM Studio). Si un proveedor se
    agota, cambias de modelo con `/models` sin tocar nada del setup.
 2. **Modelo por agente.** Este setup usa `openai/gpt-5.5` para la sesión
-   principal, `openai/gpt-5.3-codex-spark` con `variant: medium` para
+   principal, `openai/gpt-5.6-terra` con `variant: medium` para
    implementer, y `openai/gpt-5.4-mini` para test-writer (`low`) y reviewer
    (`high`). Así el modelo general más capaz orquesta, mientras el trabajo
    repetitivo ocurre en modelos baratos. El razonamiento alto se reserva para

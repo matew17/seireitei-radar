@@ -1,9 +1,7 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import type { ValidationError as ClassValidationError } from 'class-validator';
-import { AppModule } from './app.module';
-import { DomainExceptionFilter } from './common/filters/domain-exception.filter';
-import { ValidationError } from './common/errors/domain-error';
+import { DomainExceptionFilter } from '../src/common/filters/domain-exception.filter';
+import { ValidationError } from '../src/common/errors/domain-error';
 
 function formatValidationMessages(errors: ClassValidationError[]): string {
   const messages = errors.flatMap((error) =>
@@ -13,8 +11,7 @@ function formatValidationMessages(errors: ClassValidationError[]): string {
   return messages.length > 0 ? messages.join('; ') : 'Invalid squad input';
 }
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+export function configureHttpApplication(app: INestApplication): void {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -25,6 +22,4 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new DomainExceptionFilter());
-  await app.listen(process.env.PORT ?? 3000);
 }
-void bootstrap();

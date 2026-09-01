@@ -18,11 +18,11 @@
 
 **Purpose**: Establish shared NestJS infrastructure required by all Squad stories.
 
-- [ ] T001 Install DTO validation dependencies `class-validator` and `class-transformer` in `package.json` and `package-lock.json`
-- [ ] T002 Enable global validation pipe and domain exception filter registration in `src/main.ts`
-- [ ] T003 [P] Create Prisma module and service in `src/prisma/prisma.module.ts` and `src/prisma/prisma.service.ts`
-- [ ] T004 [P] Create domain error primitives in `src/common/errors/domain-error.ts`
-- [ ] T005 [P] Create global domain exception filter in `src/common/filters/domain-exception.filter.ts`
+- [x] T001 Install DTO validation dependencies `class-validator` and `class-transformer` in `package.json` and `package-lock.json`
+- [x] T002 Enable global validation pipe and domain exception filter registration in `src/main.ts`
+- [x] T003 [P] Create Prisma module and service in `src/prisma/prisma.module.ts` and `src/prisma/prisma.service.ts`
+- [x] T004 [P] Create domain error primitives in `src/common/errors/domain-error.ts`
+- [x] T005 [P] Create global domain exception filter in `src/common/filters/domain-exception.filter.ts`
 
 ---
 
@@ -32,12 +32,12 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T006 Create Squad module skeleton in `src/squads/squads.module.ts`, `src/squads/squads.controller.ts`, `src/squads/squads.service.ts`, and `src/squads/squads.repository.ts`
-- [ ] T007 Register `SquadsModule` and `PrismaModule` in `src/app.module.ts`
-- [ ] T008 Add a versioned Prisma migration under `prisma/migrations/` that creates PostgreSQL check constraint `Squad_maxThreatLevel_check` enforcing BR-03 values 1, 2, and 3
-- [ ] T009 [P] Create e2e test helpers for clearing and seeding squads in `test/squads-test-utils.ts`
-- [ ] T010 [P] Add BR-03 real PostgreSQL constraint test in `test/squads.e2e-spec.ts` that names `BR-03` and proves invalid `maxThreatLevel` is rejected by the database
-- [ ] T011 [P] Add BR-02 real PostgreSQL uniqueness test in `test/squads.e2e-spec.ts` that names `BR-02` and proves duplicate `number` is rejected by the database
+- [x] T006 Create Squad module skeleton in `src/squads/squads.module.ts`, `src/squads/squads.controller.ts`, `src/squads/squads.service.ts`, and `src/squads/squads.repository.ts`
+- [x] T007 Register `SquadsModule` and `PrismaModule` in `src/app.module.ts`
+- [x] T008 Add a versioned Prisma migration under `prisma/migrations/` that creates PostgreSQL check constraint `Squad_maxThreatLevel_check` enforcing BR-03 values 1, 2, and 3
+- [x] T009 [P] Create e2e test helpers for clearing and seeding squads in `test/squads-test-utils.ts`
+- [x] T010 [P] Add BR-03 real PostgreSQL constraint test in `test/squads.e2e-spec.ts` that names `BR-03` and proves invalid `maxThreatLevel` is rejected by the database
+- [x] T011 [P] Add BR-02 real PostgreSQL uniqueness test in `test/squads.e2e-spec.ts` that names `BR-02` and proves duplicate `number` is rejected by the database
 
 **Checkpoint**: Foundation ready; user story implementation can begin.
 
@@ -51,16 +51,16 @@
 
 ### Tests for User Story 1
 
-- [ ] T012 [P] [US1] Add create squad API e2e tests for success and default availability in `test/squads.e2e-spec.ts`
-- [ ] T013 [P] [US1] Add create squad e2e tests naming `BR-02` and `BR-03` for duplicate number and invalid max threat level in `test/squads.e2e-spec.ts`
-- [ ] T014 [P] [US1] Add service unit tests for create behavior and client-safe duplicate handling in `src/squads/squads.service.spec.ts`
+- [x] T012 [P] [US1] Add create squad API e2e tests for success and default availability in `test/squads.e2e-spec.ts`
+- [x] T013 [P] [US1] Add create squad e2e tests naming `BR-02` and `BR-03` for duplicate number and invalid max threat level in `test/squads.e2e-spec.ts`
+- [x] T014 [P] [US1] Add service unit tests for create behavior and client-safe duplicate handling in `src/squads/squads.service.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Create create DTO with class-validator rules in `src/squads/dto/create-squad.dto.ts`
-- [ ] T016 [US1] Implement Squad create persistence methods in `src/squads/squads.repository.ts`
-- [ ] T017 [US1] Implement Squad create business flow and Prisma-error translation in `src/squads/squads.service.ts`
-- [ ] T018 [US1] Implement `POST /squads` endpoint mapping in `src/squads/squads.controller.ts`
+- [x] T015 [P] [US1] Create create DTO with class-validator rules in `src/squads/dto/create-squad.dto.ts`
+- [x] T016 [US1] Implement Squad create persistence methods in `src/squads/squads.repository.ts`
+- [x] T017 [US1] Implement Squad create business flow and Prisma-error translation in `src/squads/squads.service.ts`
+- [x] T018 [US1] Implement `POST /squads` endpoint mapping in `src/squads/squads.controller.ts`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -74,15 +74,15 @@
 
 ### Tests for User Story 2
 
-- [ ] T019 [P] [US2] Add list squads e2e test covering unavailable squads in `test/squads.e2e-spec.ts`
-- [ ] T020 [P] [US2] Add get squad e2e tests for found and not-found outcomes in `test/squads.e2e-spec.ts`
-- [ ] T021 [P] [US2] Add service unit tests for roster and lookup behavior in `src/squads/squads.service.spec.ts`
+- [x] T019 [P] [US2] Add list squads e2e test covering unavailable squads in `test/squads.e2e-spec.ts`
+- [x] T020 [P] [US2] Add get squad e2e tests for found and not-found outcomes in `test/squads.e2e-spec.ts`
+- [x] T021 [P] [US2] Add service unit tests for roster and lookup behavior in `src/squads/squads.service.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T022 [US2] Implement Squad list and find-by-id repository methods in `src/squads/squads.repository.ts`
-- [ ] T023 [US2] Implement Squad list and get service methods with not-found domain errors in `src/squads/squads.service.ts`
-- [ ] T024 [US2] Implement `GET /squads` and `GET /squads/:id` endpoint mappings in `src/squads/squads.controller.ts`
+- [x] T022 [US2] Implement Squad list and find-by-id repository methods in `src/squads/squads.repository.ts`
+- [x] T023 [US2] Implement Squad list and get service methods with not-found domain errors in `src/squads/squads.service.ts`
+- [x] T024 [US2] Implement `GET /squads` and `GET /squads/:id` endpoint mappings in `src/squads/squads.controller.ts`
 
 **Checkpoint**: User Story 2 is independently functional and testable.
 
@@ -96,17 +96,17 @@
 
 ### Tests for User Story 3
 
-- [ ] T025 [P] [US3] Add partial update e2e tests for preserved omitted fields in `test/squads.e2e-spec.ts`
-- [ ] T026 [P] [US3] Add update e2e tests naming `BR-02` and `BR-03` for duplicate number and invalid max threat level in `test/squads.e2e-spec.ts`
-- [ ] T027 [P] [US3] Add remove e2e test verifying removal marks `isAvailable` false and roster still includes the squad in `test/squads.e2e-spec.ts`
-- [ ] T028 [P] [US3] Add service unit tests for partial update, not-found update, remove-as-unavailable, and not-found remove in `src/squads/squads.service.spec.ts`
+- [x] T025 [P] [US3] Add partial update e2e tests for preserved omitted fields in `test/squads.e2e-spec.ts`
+- [x] T026 [P] [US3] Add update e2e tests naming `BR-02` and `BR-03` for duplicate number and invalid max threat level in `test/squads.e2e-spec.ts`
+- [x] T027 [P] [US3] Add remove e2e test verifying removal marks `isAvailable` false and roster still includes the squad in `test/squads.e2e-spec.ts`
+- [x] T028 [P] [US3] Add service unit tests for partial update, not-found update, remove-as-unavailable, and not-found remove in `src/squads/squads.service.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T029 [P] [US3] Create partial update DTO with class-validator rules in `src/squads/dto/update-squad.dto.ts`
-- [ ] T030 [US3] Implement Squad update and mark-unavailable repository methods in `src/squads/squads.repository.ts`
-- [ ] T031 [US3] Implement Squad partial update and remove service methods with BR-02/BR-03 safe error translation in `src/squads/squads.service.ts`
-- [ ] T032 [US3] Implement `PATCH /squads/:id` and `DELETE /squads/:id` endpoint mappings in `src/squads/squads.controller.ts`
+- [x] T029 [P] [US3] Create partial update DTO with class-validator rules in `src/squads/dto/update-squad.dto.ts`
+- [x] T030 [US3] Implement Squad update and mark-unavailable repository methods in `src/squads/squads.repository.ts`
+- [x] T031 [US3] Implement Squad partial update and remove service methods with BR-02/BR-03 safe error translation in `src/squads/squads.service.ts`
+- [x] T032 [US3] Implement `PATCH /squads/:id` and `DELETE /squads/:id` endpoint mappings in `src/squads/squads.controller.ts`
 
 **Checkpoint**: All user stories are independently functional and testable.
 
@@ -116,14 +116,14 @@
 
 **Purpose**: Validate contract alignment, rule traceability, and project quality gates.
 
-- [ ] T033 [P] Verify implemented responses match `specs/001-squad-crud-apis/contracts/squads.openapi.yaml`
-- [ ] T034 [P] Add or update README/API usage notes for Squad CRUD in `README.md`
-- [ ] T035 Ensure tests name every applicable rule ID `BR-01`, `BR-02`, and `BR-03` in `test/squads.e2e-spec.ts` or `src/squads/squads.service.spec.ts`
-- [ ] T036 Run `npm run lint` and fix any reported issues in touched files
-- [ ] T037 Run `npm test` and fix any reported issues in touched files
-- [ ] T038 Run `npm run test:e2e` against real PostgreSQL and fix any reported issues in touched files
-- [ ] T039 Run `npm run build` and fix any reported issues in touched files
-- [ ] T040 Validate `specs/001-squad-crud-apis/quickstart.md` end-to-end and update only if observed behavior differs from the approved spec
+- [x] T033 [P] Verify implemented responses match `specs/001-squad-crud-apis/contracts/squads.openapi.yaml`
+- [x] T034 [P] Add or update README/API usage notes for Squad CRUD in `README.md`
+- [x] T035 Ensure tests name every applicable rule ID `BR-01`, `BR-02`, and `BR-03` in `test/squads.e2e-spec.ts` or `src/squads/squads.service.spec.ts`
+- [x] T036 Run `npm run lint` and fix any reported issues in touched files
+- [x] T037 Run `npm test` and fix any reported issues in touched files
+- [x] T038 Run `npm run test:e2e` against real PostgreSQL and fix any reported issues in touched files
+- [x] T039 Run `npm run build` and fix any reported issues in touched files
+- [x] T040 Validate `specs/001-squad-crud-apis/quickstart.md` end-to-end and update only if observed behavior differs from the approved spec
 
 ---
 

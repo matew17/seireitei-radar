@@ -25,6 +25,22 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Squad CRUD API usage
+
+Base path: `/squads`
+
+- `POST /squads` creates a squad.
+  - Required: `number`, `captainName`, `maxThreatLevel`, `currentLat`, `currentLng`
+  - Optional: `isAvailable` (defaults to `true`)
+  - Returns `201` on success, `400` for invalid input or BR-03, `409` for duplicate squad number (BR-02)
+- `GET /squads` returns all squads, including squads marked unavailable.
+- `GET /squads/:id` returns one squad or `404` if not found.
+- `PATCH /squads/:id` partially updates any mutable squad fields.
+  - Omitted fields are preserved.
+  - Returns `400` for invalid input or BR-03, `409` for duplicate squad number (BR-02), `404` if not found.
+- `DELETE /squads/:id` marks the squad unavailable instead of deleting it.
+  - Returns the updated squad or `404` if not found.
+
 ## Project setup
 
 ```bash

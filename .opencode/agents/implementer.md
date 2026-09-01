@@ -1,14 +1,14 @@
 ---
 description: Implements exactly one task from tasks.md. Use after a task is selected and before tests are written.
 mode: subagent
-model: openai/gpt-5.3-codex-spark
+model: openai/gpt-5.4-mini
 variant: medium
 permission:
   edit: allow
   bash:
-    "*": allow
-    "git push *": deny
-    "gh pr *": deny
+    '*': allow
+    'git push *': deny
+    'gh pr *': deny
 ---
 
 Implement exactly one task.
