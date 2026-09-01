@@ -7,10 +7,10 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import type { Squad } from '../../generated/prisma/client';
-import { CreateSquadDto } from './dto/create-squad.dto';
-import { UpdateSquadDto } from './dto/update-squad.dto';
-import { SquadsService } from './squads.service';
+import type { Squad } from '../../../generated/prisma/client';
+import { CreateSquadDto } from '../dto/create-squad.dto';
+import { UpdateSquadDto } from '../dto/update-squad.dto';
+import { SquadsService } from '../services/squads.service';
 
 @Controller('squads')
 export class SquadsController {

@@ -19,12 +19,42 @@
       "*--no-verify*": "deny",
       "git reset --hard*": "deny",
       "gh pr merge*": "deny"
-    }
+    },
+    "read": {
+      "*": "allow",
+      ".env": "deny",
+      ".env.*": "deny",
+      "**/.env": "deny",
+      "**/.env.*": "deny"
+    },
+    "glob": {
+      "*": "allow",
+      ".env": "deny",
+      ".env.*": "deny",
+      "**/.env": "deny",
+      "**/.env.*": "deny"
+    },
+    "grep": {
+      "*": "allow",
+      ".env": "deny",
+      ".env.*": "deny",
+      "**/.env": "deny",
+      "**/.env.*": "deny"
+    },
+    "list": {
+      "*": "allow",
+      ".env": "deny",
+      ".env.*": "deny",
+      "**/.env": "deny",
+      "**/.env.*": "deny"
+    },
+    "external_directory": "deny"
   },
   "plugin": [
     "./plugins/git-guard.ts",
     "./plugins/fast-check.ts",
     "./plugins/prisma-guard.ts",
-    "./plugins/telemetry.ts"
+    "./plugins/telemetry.ts",
+    "./plugins/deny-dotenv.ts"
   ]
 }

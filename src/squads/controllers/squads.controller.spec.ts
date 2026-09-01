@@ -1,11 +1,11 @@
-jest.mock('./squads.service', () => ({
+jest.mock('../services/squads.service', () => ({
   SquadsService: class SquadsService {},
 }));
 
 import { SquadsController } from './squads.controller';
-import { SquadsService } from './squads.service';
-import { DomainExceptionFilter } from '../common/filters/domain-exception.filter';
-import { NotFoundError } from '../common/errors/domain-error';
+import { SquadsService } from '../services/squads.service';
+import { DomainExceptionFilter } from '../../common/filters/domain-exception.filter';
+import { NotFoundError } from '../../common/errors/domain-error';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
