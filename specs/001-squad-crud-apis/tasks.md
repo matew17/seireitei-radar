@@ -99,13 +99,13 @@
 - [x] T025 [P] [US3] Add partial update e2e tests for preserved omitted fields in `test/squads.e2e-spec.ts`
 - [x] T026 [P] [US3] Add update e2e tests naming `BR-02` and `BR-03` for duplicate number and invalid max threat level in `test/squads.e2e-spec.ts`
 - [x] T027 [P] [US3] Add remove e2e test verifying removal marks `isAvailable` false and roster still includes the squad in `test/squads.e2e-spec.ts`
-- [ ] T028 [P] [US3] Add service unit tests for partial update, not-found update, remove-as-unavailable, and not-found remove in `src/squads/squads.service.spec.ts`
+- [x] T028 [P] [US3] Add service unit tests for partial update, not-found update, remove-as-unavailable, and not-found remove in `src/squads/squads.service.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T029 [P] [US3] Create partial update DTO with class-validator rules in `src/squads/dto/update-squad.dto.ts`
-- [ ] T030 [US3] Implement Squad update and mark-unavailable repository methods in `src/squads/squads.repository.ts`
-- [ ] T031 [US3] Implement Squad partial update and remove service methods with BR-02/BR-03 safe error translation in `src/squads/squads.service.ts`
+- [x] T029 [P] [US3] Create partial update DTO with class-validator rules in `src/squads/dto/update-squad.dto.ts`
+- [x] T030 [US3] Implement Squad update and mark-unavailable repository methods in `src/squads/squads.repository.ts`
+- [x] T031 [US3] Implement Squad partial update and remove service methods with BR-02/BR-03 safe error translation in `src/squads/squads.service.ts`
 - [x] T032 [US3] Implement `PATCH /squads/:id` and `DELETE /squads/:id` endpoint mappings in `src/squads/squads.controller.ts`
 
 **Checkpoint**: All user stories are independently functional and testable.

@@ -323,5 +323,4 @@ describe('SquadsService update and removal', () => {
       maxThreatLevel: 4,
     });
   });
-
 });
