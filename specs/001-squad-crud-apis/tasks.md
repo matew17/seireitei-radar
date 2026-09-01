@@ -58,7 +58,7 @@
 ### Implementation for User Story 1
 
 - [x] T015 [P] [US1] Create create DTO with class-validator rules in `src/squads/dto/create-squad.dto.ts`
-- [ ] T016 [US1] Implement Squad create persistence methods in `src/squads/squads.repository.ts`
+- [x] T016 [US1] Implement Squad create persistence methods in `src/squads/squads.repository.ts`
 - [ ] T017 [US1] Implement Squad create business flow and Prisma-error translation in `src/squads/squads.service.ts`
 - [ ] T018 [US1] Implement `POST /squads` endpoint mapping in `src/squads/squads.controller.ts`
 
