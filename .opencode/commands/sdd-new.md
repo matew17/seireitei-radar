@@ -37,7 +37,35 @@ problem — do not continue to the next.
    with: NestJS, Prisma, PostgreSQL, module structure per the constitution.
    Any concurrency invariant must be planned as a database constraint.
 
-5. Read `.opencode/commands/speckit.tasks.md` and follow its instructions.
+5. Read `.opencode/commands/speckit.tasks.md` and follow its instructions,
+   applying this task-sizing policy:
+
+   - Prefer cohesive, vertically complete implementation tasks over file-level
+     tasks. One task may update multiple layers and files when they jointly
+     deliver one behavior or structural outcome.
+   - Group a behavior's DTO, repository, service, controller, and focused tests
+     into one task when they are normally implemented and verified together.
+   - Group related edits to the same files into one task. Never create separate
+     tasks merely for individual methods, test cases, file moves, imports, or
+     validation commands.
+   - Keep a Prisma schema change and its required migration in the same task.
+     Include its rule-named database test when that test verifies the same
+     invariant.
+   - Use separate tasks only for independently deliverable user stories,
+     genuine dependency boundaries, materially different concerns, or work
+     that can safely be implemented and committed in parallel without editing
+     the same files.
+   - Combine lint, test, e2e, build, contract, and quickstart verification into
+     one final validation task unless one requires a distinct environment or
+     remediation effort.
+   - Each task must remain executable by one agent in one focused session and
+     produce one coherent Conventional Commit. It must state the outcome,
+     relevant files, tests, and BR-xx coverage without prescribing every edit
+     as a separate subtask.
+   - Before finalizing, run a consolidation pass: merge adjacent tasks that
+     touch the same implementation slice or are not independently valuable.
+     Do not optimize for task count, but reject granularity whose only benefit
+     is tracking each file or layer separately.
 
 6. Read `.opencode/commands/speckit.analyze.md` and follow its instructions.
    If it reports gaps or inconsistencies, report them and STOP.
