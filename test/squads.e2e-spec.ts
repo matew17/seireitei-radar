@@ -1,10 +1,48 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import type { Squad } from '../generated/prisma/client';
 import { PrismaClient } from '../generated/prisma/client';
 import { App } from 'supertest/types';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { clearSquads } from './squads-test-utils';
+import { clearSquads, seedSquads } from './squads-test-utils';
+
+type RosterSquad = Pick<
+  Squad,
+  | 'id'
+  | 'number'
+  | 'captainName'
+  | 'isAvailable'
+  | 'maxThreatLevel'
+  | 'currentLat'
+  | 'currentLng'
+>;
+
+function isRosterSquad(value: unknown): value is RosterSquad {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const squad = value as Record<string, unknown>;
+
+  return (
+    typeof squad.id === 'string' &&
+    typeof squad.number === 'number' &&
+    typeof squad.captainName === 'string' &&
+    typeof squad.isAvailable === 'boolean' &&
+    typeof squad.maxThreatLevel === 'number' &&
+    typeof squad.currentLat === 'number' &&
+    typeof squad.currentLng === 'number'
+  );
+}
+
+function parseRosterResponse(body: unknown): RosterSquad[] {
+  if (!Array.isArray(body) || !body.every(isRosterSquad)) {
+    throw new Error('Expected GET /squads to return an array of squads');
+  }
+
+  return body;
+}
 
 describe('Squad database constraints (e2e)', () => {
   const prisma = new PrismaClient();
@@ -156,5 +194,61 @@ describe('Create squad API (e2e)', () => {
       .expect(400);
 
     await expect(prisma.squad.count()).resolves.toBe(0);
+  });
+});
+
+describe('List squads API (e2e)', () => {
+  const prisma = new PrismaClient();
+  let app: INestApplication<App>;
+
+  beforeAll(async () => {
+    await prisma.$connect();
+
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  beforeEach(async () => {
+    await clearSquads(prisma);
+  });
+
+  afterAll(async () => {
+    await app.close();
+    await prisma.$disconnect();
+  });
+
+  it('returns all squads in the roster, including unavailable squads', async () => {
+    const squads = await seedSquads(prisma, [
+      {
+        number: 1,
+        captainName: 'Genryusai Shigekuni Yamamoto',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35.6762,
+        currentLng: 139.6503,
+      },
+      {
+        number: 2,
+        captainName: 'Retsu Unohana',
+        isAvailable: false,
+        maxThreatLevel: 2,
+        currentLat: 35.6895,
+        currentLng: 139.6917,
+      },
+    ]);
+
+    const { body } = (await request(app.getHttpServer())
+      .get('/squads')
+      .expect(200)) as { body: unknown };
+
+    const roster = parseRosterResponse(body);
+
+    expect(roster).toHaveLength(2);
+    expect(roster).toEqual(expect.arrayContaining(squads));
+    expect(roster.some(({ isAvailable }) => !isAvailable)).toBe(true);
   });
 });
