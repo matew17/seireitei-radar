@@ -1,41 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { ConflictError } from '../common/errors/domain-error';
+import type { Prisma, Squad } from '../../generated/prisma/client';
 import { SquadsRepository } from './squads.repository';
-
-type CreateSquadInput = {
-  number: number;
-  captainName: string;
-  isAvailable?: boolean;
-  maxThreatLevel: number;
-  currentLat: number;
-  currentLng: number;
-};
-
-type Squad = Required<CreateSquadInput> & { id: string };
-
-type SquadCreator = {
-  create(data: CreateSquadInput): Promise<Squad>;
-};
-
-type PrismaError = {
-  code?: string;
-};
 
 @Injectable()
 export class SquadsService {
   constructor(private readonly squadsRepository: SquadsRepository) {}
 
-  async create(data: CreateSquadInput): Promise<Squad> {
+  async create(data: Prisma.SquadCreateInput): Promise<Squad> {
     try {
-      return await (this.squadsRepository as unknown as SquadCreator).create(
-        data,
-      );
-    } catch (error) {
-      if ((error as PrismaError).code === 'P2002') {
+      return await this.squadsRepository.create(data);
+    } catch (error: unknown) {
+      if (this.isUniqueConstraintError(error)) {
         throw new ConflictError('Squad number already exists');
       }
 
       throw error;
     }
+  }
+
+  private isUniqueConstraintError(
+    error: unknown,
+  ): error is Prisma.PrismaClientKnownRequestError {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code?: unknown }).code === 'P2002'
+    );
   }
 }

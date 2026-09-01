@@ -62,4 +62,29 @@ describe('SquadsService create', () => {
     });
     expect((thrown as Error).message).not.toContain(persistenceMessage);
   });
+
+  it('BR-02 translates a Prisma P2002 error using its code rather than exposing persistence details', async () => {
+    create.mockRejectedValue({
+      code: 'P2002',
+      meta: { target: ['number'] },
+      message: 'Prisma internal unique constraint details',
+    });
+
+    let thrown: unknown;
+    try {
+      await service.create(squadInput);
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toMatchObject({
+      code: 'CONFLICT',
+      statusCode: 409,
+      message: 'Squad number already exists',
+    });
+    expect((thrown as Error).message).not.toContain(
+      'Prisma internal unique constraint details',
+    );
+    expect(create).toHaveBeenCalledTimes(1);
+  });
 });
