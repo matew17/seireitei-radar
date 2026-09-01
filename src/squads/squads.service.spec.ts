@@ -283,4 +283,45 @@ describe('SquadsService update and removal', () => {
     expect(markUnavailable).toHaveBeenCalledTimes(1);
   });
 
+  it('translates a duplicate number persistence error during partial update without exposing its details', async () => {
+    const persistenceMessage =
+      'Unique constraint failed on the fields: (`number`) for Squad';
+    update.mockRejectedValue(
+      Object.assign(new Error(persistenceMessage), { code: 'P2002' }),
+    );
+
+    let thrown: unknown;
+    try {
+      await service.update(existingSquad.id, { number: 12 });
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toMatchObject({
+      statusCode: 409,
+      message: 'Squad number already exists',
+    });
+    expect((thrown as Error).message).not.toContain(persistenceMessage);
+    expect(update).toHaveBeenCalledWith(existingSquad.id, { number: 12 });
+  });
+
+  it('BR-03: translates an invalid threat-level persistence error during partial update without exposing its details', async () => {
+    const persistenceMessage =
+      'Invalid `maxThreatLevel`: violates Squad_maxThreatLevel_check';
+    update.mockRejectedValue(
+      Object.assign(new Error(persistenceMessage), { code: 'P2004' }),
+    );
+
+    let thrown: unknown;
+    try {
+      await service.update(existingSquad.id, { maxThreatLevel: 4 });
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toMatchObject({ statusCode: 400 });
+    expect((thrown as Error).message).not.toContain(persistenceMessage);
+    expect(update).toHaveBeenCalledWith(existingSquad.id, {
+      maxThreatLevel: 4,
+    });
+  });
+
 });
