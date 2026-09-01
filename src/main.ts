@@ -1,9 +1,12 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 import type { ValidationError as ClassValidationError } from 'class-validator';
 import { AppModule } from './app.module';
-import { DomainExceptionFilter } from './common/filters/domain-exception.filter';
 import { ValidationError } from './common/errors/domain-error';
+import { DomainExceptionFilter } from './common/filters/domain-exception.filter';
 
 function formatValidationMessages(errors: ClassValidationError[]): string {
   const messages = errors.flatMap((error) =>
@@ -25,6 +28,15 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new DomainExceptionFilter());
+
+  const config = new DocumentBuilder()
+    .setTitle('Seiretei API')
+    .setDescription('Documentacion para la API de Seiretei')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();
