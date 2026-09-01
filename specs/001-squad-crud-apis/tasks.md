@@ -119,7 +119,7 @@
 - [x] T033 [P] Verify implemented responses match `specs/001-squad-crud-apis/contracts/squads.openapi.yaml`
 - [x] T034 [P] Add or update README/API usage notes for Squad CRUD in `README.md`
 - [x] T035 Ensure tests name every applicable rule ID `BR-01`, `BR-02`, and `BR-03` in `test/squads.e2e-spec.ts` or `src/squads/squads.service.spec.ts`
-- [ ] T036 Run `npm run lint` and fix any reported issues in touched files
+- [x] T036 Run `npm run lint` and fix any reported issues in touched files
 - [ ] T037 Run `npm test` and fix any reported issues in touched files
 - [x] T038 Run `npm run test:e2e` against real PostgreSQL and fix any reported issues in touched files
 - [ ] T039 Run `npm run build` and fix any reported issues in touched files
