@@ -296,12 +296,12 @@ describe('Get squad API (e2e)', () => {
     expect(body).toMatchObject(squad);
   });
 
-  it('returns a not-found response when the requested identity does not exist', async () => {
+  it('T024: maps a missing GET /squads/:id through the production domain exception filter', async () => {
     const { body } = (await request(app.getHttpServer())
       .get('/squads/00000000-0000-0000-0000-000000000000')
       .expect(404)) as { body: unknown };
 
-    expect(body).toMatchObject({
+    expect(body).toEqual({
       code: 'SQUAD_NOT_FOUND',
       message: 'Squad not found',
     });
