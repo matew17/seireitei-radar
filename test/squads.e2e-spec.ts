@@ -425,4 +425,40 @@ describe('Update squad API (e2e)', () => {
       prisma.squad.findUnique({ where: { id: squad.id } }),
     ).resolves.toMatchObject(squad);
   });
+
+  it('T027: marks a deleted squad unavailable and keeps it in the roster', async () => {
+    const [squad] = await seedSquads(prisma, [
+      {
+        number: 1,
+        captainName: 'Genryusai Shigekuni Yamamoto',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35.6762,
+        currentLng: 139.6503,
+      },
+    ]);
+
+    const deleteResponse = await request(app.getHttpServer())
+      .delete(`/squads/${squad.id}`)
+      .expect(200);
+
+    expect(deleteResponse.body).toMatchObject({
+      id: squad.id,
+      isAvailable: false,
+    });
+
+    const { body } = (await request(app.getHttpServer())
+      .get('/squads')
+      .expect(200)) as { body: unknown };
+    const roster = parseRosterResponse(body);
+
+    expect(roster).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: squad.id,
+          isAvailable: false,
+        }),
+      ]),
+    );
+  });
 });
