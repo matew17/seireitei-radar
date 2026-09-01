@@ -82,7 +82,7 @@
 
 - [x] T022 [US2] Implement Squad list and find-by-id repository methods in `src/squads/squads.repository.ts`
 - [x] T023 [US2] Implement Squad list and get service methods with not-found domain errors in `src/squads/squads.service.ts`
-- [ ] T024 [US2] Implement `GET /squads` and `GET /squads/:id` endpoint mappings in `src/squads/squads.controller.ts`
+- [x] T024 [US2] Implement `GET /squads` and `GET /squads/:id` endpoint mappings in `src/squads/squads.controller.ts`
 
 **Checkpoint**: User Story 2 is independently functional and testable.
 
@@ -96,9 +96,9 @@
 
 ### Tests for User Story 3
 
-- [ ] T025 [P] [US3] Add partial update e2e tests for preserved omitted fields in `test/squads.e2e-spec.ts`
-- [ ] T026 [P] [US3] Add update e2e tests naming `BR-02` and `BR-03` for duplicate number and invalid max threat level in `test/squads.e2e-spec.ts`
-- [ ] T027 [P] [US3] Add remove e2e test verifying removal marks `isAvailable` false and roster still includes the squad in `test/squads.e2e-spec.ts`
+- [x] T025 [P] [US3] Add partial update e2e tests for preserved omitted fields in `test/squads.e2e-spec.ts`
+- [x] T026 [P] [US3] Add update e2e tests naming `BR-02` and `BR-03` for duplicate number and invalid max threat level in `test/squads.e2e-spec.ts`
+- [x] T027 [P] [US3] Add remove e2e test verifying removal marks `isAvailable` false and roster still includes the squad in `test/squads.e2e-spec.ts`
 - [ ] T028 [P] [US3] Add service unit tests for partial update, not-found update, remove-as-unavailable, and not-found remove in `src/squads/squads.service.spec.ts`
 
 ### Implementation for User Story 3
