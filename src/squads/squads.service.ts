@@ -31,7 +31,7 @@ export class SquadsService {
     const squad = await this.squadsRepository.get(id);
 
     if (!squad) {
-      throw new NotFoundError(`Squad ${id} not found`);
+      throw new NotFoundError();
     }
 
     return squad;
@@ -50,7 +50,7 @@ export class SquadsService {
     }
 
     if (!squad) {
-      throw new NotFoundError(`Squad ${id} not found`);
+      throw new NotFoundError();
     }
 
     return squad;
@@ -60,7 +60,7 @@ export class SquadsService {
     const squad = await this.squadsRepository.markUnavailable(id);
 
     if (!squad) {
-      throw new NotFoundError(`Squad ${id} not found`);
+      throw new NotFoundError();
     }
 
     return squad;

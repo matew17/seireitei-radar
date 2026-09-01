@@ -19,7 +19,7 @@ export class ConflictError extends DomainError {
 }
 
 export class NotFoundError extends DomainError {
-  constructor(message: string) {
+  constructor(message = 'Squad not found') {
     super(message, 'NOT_FOUND', 404);
     this.name = 'NotFoundError';
   }

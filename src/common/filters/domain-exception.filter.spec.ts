@@ -46,7 +46,7 @@ describe('DomainExceptionFilter', () => {
 
     const error = {
       statusCode: HttpStatus.NOT_FOUND,
-      code: 'SQUAD_NOT_FOUND',
+      code: 'NOT_FOUND',
       message: 'Squad not found',
       cause: new Error('record not found in persistence layer'),
     };
@@ -55,7 +55,7 @@ describe('DomainExceptionFilter', () => {
 
     expect(status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
     expect(json).toHaveBeenCalledWith({
-      code: 'SQUAD_NOT_FOUND',
+      code: 'NOT_FOUND',
       message: 'Squad not found',
     });
     expect(JSON.stringify(json.mock.calls[0][0])).not.toContain(
