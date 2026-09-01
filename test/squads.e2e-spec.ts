@@ -252,3 +252,58 @@ describe('List squads API (e2e)', () => {
     expect(roster.some(({ isAvailable }) => !isAvailable)).toBe(true);
   });
 });
+
+describe('Get squad API (e2e)', () => {
+  const prisma = new PrismaClient();
+  let app: INestApplication<App>;
+
+  beforeAll(async () => {
+    await prisma.$connect();
+
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  beforeEach(async () => {
+    await clearSquads(prisma);
+  });
+
+  afterAll(async () => {
+    await app.close();
+    await prisma.$disconnect();
+  });
+
+  it('returns a squad when the requested identity exists', async () => {
+    const [squad] = await seedSquads(prisma, [
+      {
+        number: 1,
+        captainName: 'Genryusai Shigekuni Yamamoto',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35.6762,
+        currentLng: 139.6503,
+      },
+    ]);
+
+    const { body } = (await request(app.getHttpServer())
+      .get(`/squads/${squad.id}`)
+      .expect(200)) as { body: unknown };
+
+    expect(body).toMatchObject(squad);
+  });
+
+  it('returns a not-found response when the requested identity does not exist', async () => {
+    const { body } = (await request(app.getHttpServer())
+      .get('/squads/00000000-0000-0000-0000-000000000000')
+      .expect(404)) as { body: unknown };
+
+    expect(body).toMatchObject({
+      code: 'SQUAD_NOT_FOUND',
+      message: 'Squad not found',
+    });
+  });
+});
