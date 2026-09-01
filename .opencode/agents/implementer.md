@@ -2,7 +2,7 @@
 description: Implements exactly one task from tasks.md. Use after a task is selected and before tests are written.
 mode: subagent
 model: openai/gpt-5.6-terra
-variant: medium
+variant: low
 permission:
   edit: allow
   bash:
