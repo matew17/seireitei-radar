@@ -106,7 +106,7 @@
 - [ ] T029 [P] [US3] Create partial update DTO with class-validator rules in `src/squads/dto/update-squad.dto.ts`
 - [ ] T030 [US3] Implement Squad update and mark-unavailable repository methods in `src/squads/squads.repository.ts`
 - [ ] T031 [US3] Implement Squad partial update and remove service methods with BR-02/BR-03 safe error translation in `src/squads/squads.service.ts`
-- [ ] T032 [US3] Implement `PATCH /squads/:id` and `DELETE /squads/:id` endpoint mappings in `src/squads/squads.controller.ts`
+- [x] T032 [US3] Implement `PATCH /squads/:id` and `DELETE /squads/:id` endpoint mappings in `src/squads/squads.controller.ts`
 
 **Checkpoint**: All user stories are independently functional and testable.
 

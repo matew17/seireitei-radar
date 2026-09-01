@@ -154,3 +154,108 @@ describe('SquadsController read mappings', () => {
     }
   });
 });
+
+describe('SquadsController maintenance mappings', () => {
+  const squad = {
+    id: 'squad-to-maintain',
+    number: 1,
+    captainName: 'Genryusai Shigekuni Yamamoto',
+    isAvailable: true,
+    maxThreatLevel: 3,
+    currentLat: 35.6762,
+    currentLng: 139.6503,
+  };
+
+  async function createApp(service: {
+    update: jest.Mock;
+    remove: jest.Mock;
+  }): Promise<INestApplication> {
+    const module = await Test.createTestingModule({
+      controllers: [SquadsController],
+      providers: [{ provide: SquadsService, useValue: service }],
+    }).compile();
+    const app: INestApplication = module.createNestApplication();
+    app.useGlobalFilters(new DomainExceptionFilter());
+    await app.init();
+    return app;
+  }
+
+  it('T032: maps PATCH /squads/:id to the update service and returns the updated squad', async () => {
+    const payload = { captainName: 'Shunsui Kyoraku', currentLat: 35.6895 };
+    const updatedSquad = { ...squad, ...payload };
+    const update = jest.fn().mockResolvedValue(updatedSquad);
+    const remove = jest.fn();
+    const app = await createApp({ update, remove });
+
+    try {
+      await requestApp(getHttpServer(app))
+        .patch(`/squads/${squad.id}`)
+        .send(payload)
+        .expect(200)
+        .expect(updatedSquad);
+      expect(update).toHaveBeenCalledTimes(1);
+      expect(update).toHaveBeenCalledWith(squad.id, payload);
+      expect(remove).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('T032: maps DELETE /squads/:id to the remove service and returns the unavailable squad', async () => {
+    const removedSquad = { ...squad, isAvailable: false };
+    const update = jest.fn();
+    const remove = jest.fn().mockResolvedValue(removedSquad);
+    const app = await createApp({ update, remove });
+
+    try {
+      await requestApp(getHttpServer(app))
+        .delete(`/squads/${squad.id}`)
+        .expect(200)
+        .expect(removedSquad);
+      expect(remove).toHaveBeenCalledTimes(1);
+      expect(remove).toHaveBeenCalledWith(squad.id);
+      expect(update).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('T032: preserves the PATCH not-found outcome from the service', async () => {
+    const update = jest
+      .fn()
+      .mockRejectedValue(new NotFoundError('Squad not found'));
+    const remove = jest.fn();
+    const app = await createApp({ update, remove });
+
+    try {
+      await requestApp(getHttpServer(app))
+        .patch('/squads/missing-squad-id')
+        .send({ captainName: 'Retsu Unohana' })
+        .expect(404)
+        .expect({ code: 'NOT_FOUND', message: 'Squad not found' });
+      expect(update).toHaveBeenCalledWith('missing-squad-id', {
+        captainName: 'Retsu Unohana',
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('T032: preserves the DELETE not-found outcome from the service', async () => {
+    const update = jest.fn();
+    const remove = jest
+      .fn()
+      .mockRejectedValue(new NotFoundError('Squad not found'));
+    const app = await createApp({ update, remove });
+
+    try {
+      await requestApp(getHttpServer(app))
+        .delete('/squads/missing-squad-id')
+        .expect(404)
+        .expect({ code: 'NOT_FOUND', message: 'Squad not found' });
+      expect(remove).toHaveBeenCalledWith('missing-squad-id');
+    } finally {
+      await app.close();
+    }
+  });
+});
