@@ -5,6 +5,7 @@ import { ValidationError } from './common/errors/domain-error';
 import { DomainExceptionFilter } from './common/filters/domain-exception.filter';
 import { PrismaModule } from './prisma/prisma.module';
 import { SquadsModule } from './squads/squads.module';
+import { ThreatAlertsModule } from './threat-alerts/threat-alerts.module';
 
 function formatValidationMessages(errors: ClassValidationError[]): string {
   const messages = errors.flatMap((error) =>
@@ -15,7 +16,7 @@ function formatValidationMessages(errors: ClassValidationError[]): string {
 }
 
 @Module({
-  imports: [PrismaModule, SquadsModule],
+  imports: [PrismaModule, SquadsModule, ThreatAlertsModule],
   controllers: [],
   providers: [
     {
