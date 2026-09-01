@@ -10,6 +10,10 @@ NestJS + Prisma + PostgreSQL. Threat alert service for the seretei.
 ## Layout
 
 - `src/` — one NestJS module per bounded context
+- `src/<context>/` — keep `<context>.module.ts` at the context root
+- `src/<context>/controllers/`, `services/`, `repositories/`, `dto/` — place controller, service, repository, and request DTO code by responsibility
+- `src/<context>/**/*.spec.ts` — co-locate each test with the source file or DTO it verifies
+- `src/common/` — shared code used across bounded contexts
 - `prisma/schema.prisma` — schema. Migrations in `prisma/migrations/`
 - `specs/` — feature specs (Spec Kit)
 - `docs/business-rules.md` — business rules, IDs BR-xx
