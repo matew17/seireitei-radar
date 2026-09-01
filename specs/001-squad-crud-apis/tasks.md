@@ -116,7 +116,7 @@
 
 **Purpose**: Validate contract alignment, rule traceability, and project quality gates.
 
-- [ ] T033 [P] Verify implemented responses match `specs/001-squad-crud-apis/contracts/squads.openapi.yaml`
+- [x] T033 [P] Verify implemented responses match `specs/001-squad-crud-apis/contracts/squads.openapi.yaml`
 - [ ] T034 [P] Add or update README/API usage notes for Squad CRUD in `README.md`
 - [ ] T035 Ensure tests name every applicable rule ID `BR-01`, `BR-02`, and `BR-03` in `test/squads.e2e-spec.ts` or `src/squads/squads.service.spec.ts`
 - [ ] T036 Run `npm run lint` and fix any reported issues in touched files
