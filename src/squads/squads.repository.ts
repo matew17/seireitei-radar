@@ -9,4 +9,14 @@ export class SquadsRepository {
   async create(data: Prisma.SquadCreateInput): Promise<Squad> {
     return this.prisma.squad.create({ data });
   }
+
+  async list(): Promise<Squad[]> {
+    return this.prisma.squad.findMany();
+  }
+
+  async get(id: string): Promise<Squad | null> {
+    return this.prisma.squad.findUnique({
+      where: { id },
+    });
+  }
 }
