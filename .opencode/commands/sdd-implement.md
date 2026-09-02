@@ -24,7 +24,9 @@ If any fails, stop and report.
    - `CHANGES_REQUESTED` → back to step 1 with the findings
 5. On the third `CHANGES_REQUESTED` for the same task: write `.sdd/blocked.md`
    with task id, attempt count, every finding, and the last diff. Then STOP.
-6. Commit:
+6. Mark the approved task done in `tasks.md`. The completion checkbox is task
+   bookkeeping and belongs in the same commit as its implementation.
+7. Commit:
 
    &lt;type&gt;(&lt;scope&gt;): &lt;what changed&gt;
 
@@ -32,7 +34,8 @@ If any fails, stop and report.
    Rules: BR-xx, BR-yy
    Tests: &lt;test file&gt;
 
-7. Mark the task done in `tasks.md`.
+   If the commit fails, do not begin another task; keep the checkbox with the
+   pending task changes and retry the commit.
 
 ## Limits
 
