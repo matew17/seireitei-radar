@@ -29,7 +29,7 @@ description: "Task list for Return Threat Candidates"
 
 **Purpose**: Verify the complete implementation against the documented contract and project quality gates.
 
-- [ ] T002 Run the [quickstart validation](./quickstart.md) using `npm test`, `npm run test:e2e`, `npm run lint`, and `npm run build`; confirm the HTTP results conform to `specs/004-return-threat-candidates/contracts/threat-alerts.openapi.yaml`, BR-01 has named candidate-selection coverage, and BR-04 validation and real-PostgreSQL constraint coverage remain passing. Covers BR-01 and BR-04. Outcome: recorded validation results with no source changes.
+- [x] T002 Run the [quickstart validation](./quickstart.md) using `npm test`, `npm run test:e2e`, `npm run lint`, and `npm run build`; confirm the HTTP results conform to `specs/004-return-threat-candidates/contracts/threat-alerts.openapi.yaml`, BR-01 has named candidate-selection coverage, and BR-04 validation and real-PostgreSQL constraint coverage remain passing. Covers BR-01 and BR-04. Outcome: recorded validation results with no source changes.
 
 ---
 
