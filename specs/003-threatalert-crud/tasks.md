@@ -53,7 +53,7 @@ description: "Implementation tasks for ThreatAlert CRUD"
 
 **Purpose**: Validate the complete feature against its plan, contract, and constitution.
 
-- [ ] T004 Run the consolidated quickstart validation in `specs/003-threatalert-crud/quickstart.md`: `npm test`, `npm run test:e2e`, `npm run lint`, and `npm run build`; remedy only ThreatAlert CRUD failures in the relevant `src/threat-alerts/`, `test/threat-alerts*.ts`, and `prisma/` files. Outcome: the planned contract and BR-01/BR-04 traceability pass end-to-end. Covers BR-01, BR-04. Commit: `test(threat-alerts): verify CRUD workflow`.
+- [x] T004 Run the consolidated quickstart validation in `specs/003-threatalert-crud/quickstart.md`: `npm test`, `npm run test:e2e`, `npm run lint`, and `npm run build`; remedy only ThreatAlert CRUD failures in the relevant `src/threat-alerts/`, `test/threat-alerts*.ts`, and `prisma/` files. Outcome: the planned contract and BR-01/BR-04 traceability pass end-to-end. Covers BR-01, BR-04. Commit: `test(threat-alerts): verify CRUD workflow`.
 
 ## Consolidation Pass
 
