@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma, ThreatAlert } from '../../../generated/prisma/client';
+import type {
+  Prisma,
+  Squad,
+  ThreatAlert,
+} from '../../../generated/prisma/client';
 import {
   NotFoundError,
   ValidationError,
@@ -15,20 +19,32 @@ const threatAlertUpdateFields = [
   'longitude',
 ] as const;
 
+export type ThreatAlertWithCandidateSquads = ThreatAlert & {
+  candidateSquads: Squad[];
+};
+
+export type ThreatAlertResponse = ThreatAlert | ThreatAlertWithCandidateSquads;
+
 @Injectable()
 export class ThreatAlertsService {
   constructor(
     private readonly threatAlertsRepository: ThreatAlertsRepository,
   ) {}
 
-  async create(data: Prisma.ThreatAlertCreateInput): Promise<ThreatAlert> {
+  async create(
+    data: Prisma.ThreatAlertCreateInput,
+  ): Promise<ThreatAlertWithCandidateSquads> {
     try {
       const threatAlert = await this.threatAlertsRepository.create(data);
-      await this.threatAlertsRepository.findEligibleSquads(
-        threatAlert.threatLevel,
-      );
+      const candidateSquads =
+        await this.threatAlertsRepository.findEligibleSquads(
+          threatAlert.threatLevel,
+        );
 
-      return threatAlert;
+      return {
+        ...threatAlert,
+        candidateSquads,
+      };
     } catch (error: unknown) {
       if (this.isCheckConstraintError(error)) {
         throw new ValidationError('ThreatAlert threatLevel must be 1, 2, or 3');
@@ -42,13 +58,28 @@ export class ThreatAlertsService {
     return this.threatAlertsRepository.list();
   }
 
-  async update(id: string, data: ThreatAlertUpdateInput): Promise<ThreatAlert> {
+  async update(
+    id: string,
+    data: ThreatAlertUpdateInput,
+  ): Promise<ThreatAlertResponse> {
     try {
       this.assertThreatAlertUpdateFields(data);
       const threatAlert = await this.threatAlertsRepository.update(id, data);
 
       if (!threatAlert) {
         throw new NotFoundError('ThreatAlert not found');
+      }
+
+      if (data.threatLevel !== undefined) {
+        const candidateSquads =
+          await this.threatAlertsRepository.findEligibleSquads(
+            threatAlert.threatLevel,
+          );
+
+        return {
+          ...threatAlert,
+          candidateSquads,
+        };
       }
 
       return threatAlert;

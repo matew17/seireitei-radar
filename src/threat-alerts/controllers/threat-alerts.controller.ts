@@ -10,7 +10,10 @@ import {
 import type { ThreatAlert } from '../../../generated/prisma/client';
 import { CreateThreatAlertDto } from '../dto/create-threat-alert.dto';
 import { UpdateThreatAlertDto } from '../dto/update-threat-alert.dto';
-import { ThreatAlertsService } from '../services/threat-alerts.service';
+import {
+  ThreatAlertsService,
+  type ThreatAlertResponse,
+} from '../services/threat-alerts.service';
 
 @Controller('threat-alerts')
 export class ThreatAlertsController {
@@ -19,7 +22,7 @@ export class ThreatAlertsController {
   @Post()
   create(
     @Body() createThreatAlertDto: CreateThreatAlertDto,
-  ): Promise<ThreatAlert> {
+  ): Promise<ThreatAlertResponse> {
     return this.threatAlertsService.create(createThreatAlertDto);
   }
 
@@ -37,7 +40,7 @@ export class ThreatAlertsController {
   update(
     @Param('id') id: string,
     @Body() updateThreatAlertDto: UpdateThreatAlertDto,
-  ): Promise<ThreatAlert> {
+  ): Promise<ThreatAlertResponse> {
     return this.threatAlertsService.update(id, updateThreatAlertDto);
   }
 

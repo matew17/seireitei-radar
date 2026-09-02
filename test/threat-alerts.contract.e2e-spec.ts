@@ -16,6 +16,20 @@ type ThreatAlertResponse = {
   createdAt: string;
 };
 
+type SquadResponse = {
+  id: string;
+  number: number;
+  captainName: string;
+  isAvailable: boolean;
+  maxThreatLevel: number;
+  currentLat: number;
+  currentLng: number;
+};
+
+type ThreatAlertWithCandidateSquadsResponse = ThreatAlertResponse & {
+  candidateSquads: SquadResponse[];
+};
+
 function assertRecord(
   value: unknown,
 ): asserts value is Record<string, unknown> {
@@ -47,6 +61,62 @@ function assertThreatAlertResponse(
   );
 }
 
+function assertSquadResponse(body: unknown): asserts body is SquadResponse {
+  assertRecord(body);
+  expect(typeof body.id).toBe('string');
+  expect(typeof body.number).toBe('number');
+  expect(typeof body.captainName).toBe('string');
+  expect(typeof body.isAvailable).toBe('boolean');
+  expect(typeof body.maxThreatLevel).toBe('number');
+  expect(typeof body.currentLat).toBe('number');
+  expect(typeof body.currentLng).toBe('number');
+  expect(Object.keys(body).sort()).toEqual(
+    [
+      'captainName',
+      'currentLat',
+      'currentLng',
+      'id',
+      'isAvailable',
+      'maxThreatLevel',
+      'number',
+    ].sort(),
+  );
+}
+
+function assertArray(value: unknown): asserts value is unknown[] {
+  expect(Array.isArray(value)).toBe(true);
+}
+
+function assertThreatAlertWithCandidateSquadsResponse(
+  body: unknown,
+): asserts body is ThreatAlertWithCandidateSquadsResponse {
+  assertRecord(body);
+  expect(typeof body.id).toBe('string');
+  expect(typeof body.threatLevel).toBe('number');
+  expect(typeof body.latitude).toBe('number');
+  expect(typeof body.longitude).toBe('number');
+  expect(typeof body.status).toBe('string');
+  expect(body.squadId === null || typeof body.squadId === 'string').toBe(true);
+  expect(typeof body.createdAt).toBe('string');
+  expect(Object.keys(body).sort()).toEqual(
+    [
+      'candidateSquads',
+      'createdAt',
+      'id',
+      'latitude',
+      'longitude',
+      'squadId',
+      'status',
+      'threatLevel',
+    ].sort(),
+  );
+  const candidateSquads = body.candidateSquads;
+  assertArray(candidateSquads);
+  candidateSquads.forEach((candidateSquad) => {
+    assertSquadResponse(candidateSquad);
+  });
+}
+
 describe('ThreatAlert API OpenAPI contract (T003)', () => {
   const prisma = new PrismaClient();
   let app: INestApplication<App>;
@@ -71,7 +141,17 @@ describe('ThreatAlert API OpenAPI contract (T003)', () => {
     await prisma.$disconnect();
   });
 
-  it('T003: returns the ThreatAlert schema for a partial update while preserving omitted fields', async () => {
+  it('T003: returns the ThreatAlert schema with candidateSquads for a severity-submitting update', async () => {
+    const eligible = await prisma.squad.create({
+      data: {
+        number: 1,
+        captainName: 'Eligible',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
     const alert = await prisma.threatAlert.create({
       data: { threatLevel: 2, latitude: 35.3, longitude: 139.3 },
     });
@@ -81,7 +161,7 @@ describe('ThreatAlert API OpenAPI contract (T003)', () => {
       .send({ threatLevel: 3, latitude: 35.9 })
       .expect(200);
 
-    assertThreatAlertResponse(updated.body);
+    assertThreatAlertWithCandidateSquadsResponse(updated.body);
     expect(updated.body).toMatchObject({
       id: alert.id,
       threatLevel: 3,
@@ -89,6 +169,80 @@ describe('ThreatAlert API OpenAPI contract (T003)', () => {
       longitude: 139.3,
       status: 'PENDING',
       squadId: null,
+      candidateSquads: [eligible],
+    });
+  });
+
+  it('T003: returns the ThreatAlert schema without candidateSquads for a location-only update', async () => {
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 2, latitude: 35.3, longitude: 139.3 },
+    });
+
+    const updated = await request(app.getHttpServer())
+      .patch(`/threat-alerts/${alert.id}`)
+      .send({ latitude: 35.9 })
+      .expect(200);
+
+    assertThreatAlertResponse(updated.body);
+    expect(updated.body).toMatchObject({
+      id: alert.id,
+      threatLevel: 2,
+      latitude: 35.9,
+      longitude: 139.3,
+      status: 'PENDING',
+      squadId: null,
+    });
+  });
+
+  it('T003: returns the ThreatAlert schema with an empty candidateSquads collection for create', async () => {
+    await prisma.squad.create({
+      data: {
+        number: 1,
+        captainName: 'Unavailable',
+        isAvailable: false,
+        maxThreatLevel: 3,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+
+    const created = await request(app.getHttpServer())
+      .post('/threat-alerts')
+      .send({ threatLevel: 3, latitude: 35.1, longitude: 139.1 })
+      .expect(201);
+
+    assertThreatAlertWithCandidateSquadsResponse(created.body);
+    expect(created.body).toMatchObject({
+      threatLevel: 3,
+      status: 'PENDING',
+      squadId: null,
+      candidateSquads: [],
+    });
+  });
+
+  it('T003: returns the ThreatAlert schema with candidateSquads for create', async () => {
+    const eligible = await prisma.squad.create({
+      data: {
+        number: 2,
+        captainName: 'Eligible',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+
+    const created = await request(app.getHttpServer())
+      .post('/threat-alerts')
+      .send({ threatLevel: 2, latitude: 35.1, longitude: 139.1 })
+      .expect(201);
+
+    assertThreatAlertWithCandidateSquadsResponse(created.body);
+    expect(created.body).toMatchObject({
+      threatLevel: 2,
+      status: 'PENDING',
+      squadId: null,
+      candidateSquads: [eligible],
     });
   });
 
