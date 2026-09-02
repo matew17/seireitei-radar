@@ -1,114 +1,176 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Seiretei Radar
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Seiretei Radar is a threat-alert API for coordinating squads across the Seiretei. It records operational squads and threat alerts, then identifies the squads capable of responding to each threat.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Built with NestJS, Prisma, and PostgreSQL.
 
-## Description
+## Purpose
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The API supports two core operational workflows:
 
-## Squad CRUD API usage
+- Manage squads, including capacity, current location, captain, and availability.
+- Create and manage threat alerts with a severity level and location.
+- Return eligible response squads whenever a threat is created or its severity changes.
+
+A squad is eligible for a threat when it is available and its maximum supported threat level is greater than or equal to the alert's threat level.
+
+Threat levels:
+
+| Level | Threat |
+| --- | --- |
+| `1` | Hollow |
+| `2` | Menos |
+| `3` | Espada |
+
+## API
+
+The server runs on port `3000` by default. Interactive API documentation is available at:
+
+```text
+http://localhost:3000/docs
+```
+
+### Squads
 
 Base path: `/squads`
 
-- `POST /squads` creates a squad.
-  - Required: `number`, `captainName`, `maxThreatLevel`, `currentLat`, `currentLng`
-  - Optional: `isAvailable` (defaults to `true`)
-  - Returns `201` on success, `400` for invalid input or BR-03, `409` for duplicate squad number (BR-02)
-- `GET /squads` returns all squads, including squads marked unavailable.
-- `GET /squads/:id` returns one squad or `404` if not found.
-- `PATCH /squads/:id` partially updates any mutable squad fields.
-  - Omitted fields are preserved.
-  - Returns `400` for invalid input or BR-03, `409` for duplicate squad number (BR-02), `404` if not found.
-- `DELETE /squads/:id` marks the squad unavailable instead of deleting it.
-  - Returns the updated squad or `404` if not found.
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `POST` | `/squads` | Create a squad |
+| `GET` | `/squads` | List all squads, including unavailable ones |
+| `GET` | `/squads/:id` | Retrieve a squad |
+| `PATCH` | `/squads/:id` | Partially update a squad |
+| `DELETE` | `/squads/:id` | Mark a squad as unavailable |
 
-## Project setup
+A squad number must be unique. Deleting a squad does not remove its record; it sets `isAvailable` to `false`.
 
-```bash
-$ npm install
-```
+### Threat Alerts
 
-## Compile and run the project
+Base path: `/threat-alerts`
 
-```bash
-# development
-$ npm run start
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `POST` | `/threat-alerts` | Create an alert and return eligible squads |
+| `GET` | `/threat-alerts` | List alerts |
+| `GET` | `/threat-alerts/:id` | Retrieve an alert |
+| `PATCH` | `/threat-alerts/:id` | Update alert severity or location |
+| `DELETE` | `/threat-alerts/:id` | Mark an alert as resolved |
 
-# watch mode
-$ npm run start:dev
+Creating an alert returns the stored alert plus a transient `candidateSquads` collection. Updating an alert's `threatLevel` also returns candidates. Candidates are not assigned to or persisted on the alert.
 
-# production mode
-$ npm run start:prod
-```
+## Setup
 
-## Run tests
+### Prerequisites
 
-```bash
-# unit tests
-$ npm run test
+- Node.js and npm
+- A running PostgreSQL instance
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 1. Install dependencies
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 2. Configure environment variables
 
-## Resources
+Create a `.env` file in the repository root:
 
-Check out a few resources that may come in handy when working with NestJS:
+```dotenv
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/seiretei_radar?schema=public"
+PORT=3000
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+`DATABASE_URL` is required. `PORT` is optional and defaults to `3000`.
 
-## Support
+### 3. Generate the Prisma client and apply migrations
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npx prisma generate
+npx prisma migrate deploy
+```
 
-## Stay in touch
+For local schema changes, create a versioned migration instead:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+npx prisma migrate dev --name <migration-name>
+```
 
-## License
+### 4. Start the API
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+npm run start:dev
+```
+
+The API will be available at `http://localhost:3000`, with Swagger UI at `http://localhost:3000/docs`.
+
+## Quality Checks
+
+```bash
+npm run lint
+npm test
+npm run test:e2e
+npm run build
+```
+
+`npm run test:e2e` applies pending migrations before running the end-to-end suite.
+
+## Agentic Development Flow
+
+This project uses Spec Kit and OpenCode to keep implementation traceable to requirements and business rules.
+
+```text
+Feature request
+  -> Specify the behavior and acceptance criteria
+  -> Plan the technical approach
+  -> Break the plan into scoped tasks
+  -> Implement one task at a time
+  -> Write tests from the specification
+  -> Run quality gates
+  -> Review the diff against the specification and constitution
+  -> Human review and merge
+```
+
+The workflow is supported by these roles:
+
+| Role | Responsibility |
+| --- | --- |
+| Specification | Defines user stories, acceptance criteria, and scope in `specs/<feature>/spec.md` |
+| Planning | Records architecture, data model, research, contracts, and task breakdown |
+| Implementer agent | Implements exactly one task, follows project conventions, and verifies `npm run build` |
+| Test-writer agent | Writes tests from the specification and business rules without reading implementation code |
+| Reviewer agent | Reviews the final diff for scope, business-rule coverage, architecture, and constitution compliance |
+| Human | Makes merge decisions; direct pushes to `main` are not allowed |
+
+The primary workflow commands are:
+
+```text
+/speckit.specify
+/speckit.plan
+/speckit.tasks
+/speckit.implement
+/speckit.analyze
+```
+
+Project-wide constraints live in:
+
+- `.specify/memory/constitution.md`
+- `docs/business-rules.md`
+- `AGENTS.md`
+
+Every business rule has a stable `BR-xx` identifier. Tests for a rule must name that identifier, and database-enforceable invariants must be implemented as PostgreSQL constraints.
+
+## Project Structure
+
+```text
+src/
+  squads/          Squad API bounded context
+  threat-alerts/   Threat alert API bounded context
+  prisma/          Prisma integration
+  common/          Shared errors and HTTP filters
+prisma/
+  schema.prisma    Database schema
+  migrations/      Versioned database migrations
+specs/             Feature specifications and implementation plans
+docs/
+  business-rules.md
+```
