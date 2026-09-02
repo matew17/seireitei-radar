@@ -19,7 +19,7 @@ description: "Task list for Return Threat Candidates"
 
 **Independent Test**: Seed eligible, unavailable, and insufficient-capability squads; verify POST and severity-submitting PATCH return exactly the full eligible squad records, including `[]` when none qualify, and verify location-only PATCH omits `candidateSquads`.
 
-- [ ] T001 [US1] [US2] Deliver the `candidateSquads` response contract across `src/threat-alerts/repositories/threat-alerts.repository.ts`, `src/threat-alerts/services/threat-alerts.service.ts`, and `src/threat-alerts/controllers/threat-alerts.controller.ts`; add focused BR-01 and BR-04 service coverage in `src/threat-alerts/services/threat-alerts.service.spec.ts`; update create, severity-submitting update, location-only update, empty-result, and full-squad response coverage in `test/threat-alerts.e2e-spec.ts` and `test/threat-alerts.contract.e2e-spec.ts`. Covers BR-01 and BR-04. Outcome: one conventional commit, `feat(threat-alerts): return candidate squads`.
+- [x] T001 [US1] [US2] Deliver the `candidateSquads` response contract across `src/threat-alerts/repositories/threat-alerts.repository.ts`, `src/threat-alerts/services/threat-alerts.service.ts`, and `src/threat-alerts/controllers/threat-alerts.controller.ts`; add focused BR-01 and BR-04 service coverage in `src/threat-alerts/services/threat-alerts.service.spec.ts`; update create, severity-submitting update, location-only update, empty-result, and full-squad response coverage in `test/threat-alerts.e2e-spec.ts` and `test/threat-alerts.contract.e2e-spec.ts`. Covers BR-01 and BR-04. Outcome: one conventional commit, `feat(threat-alerts): return candidate squads`.
 
 **Checkpoint**: Both create and severity-submitting update flows return the approved full squad representation under `candidateSquads`; no candidate data is persisted, and location-only updates retain their existing response.
 
@@ -29,7 +29,7 @@ description: "Task list for Return Threat Candidates"
 
 **Purpose**: Verify the complete implementation against the documented contract and project quality gates.
 
-- [ ] T002 Run the [quickstart validation](./quickstart.md) using `npm test`, `npm run test:e2e`, `npm run lint`, and `npm run build`; confirm the HTTP results conform to `specs/004-return-threat-candidates/contracts/threat-alerts.openapi.yaml`, BR-01 has named candidate-selection coverage, and BR-04 validation and real-PostgreSQL constraint coverage remain passing. Covers BR-01 and BR-04. Outcome: recorded validation results with no source changes.
+- [x] T002 Run the [quickstart validation](./quickstart.md) using `npm test`, `npm run test:e2e`, `npm run lint`, and `npm run build`; confirm the HTTP results conform to `specs/004-return-threat-candidates/contracts/threat-alerts.openapi.yaml`, BR-01 has named candidate-selection coverage, and BR-04 validation and real-PostgreSQL constraint coverage remain passing. Covers BR-01 and BR-04. Outcome: recorded validation results with no source changes.
 
 ---
 
