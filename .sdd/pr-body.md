@@ -1,13 +1,13 @@
 ## Spec
 
-`specs/003-threatalert-crud/spec.md`
+`specs/004-return-threat-candidates/spec.md`
 
 ## Business rules
 
 | ID | Rule | Test |
-| --- | --- | --- |
-| BR-01 | Creating an alert identifies available squads whose maximum threat level can handle the reported threat level. | `test/threat-alerts.e2e-spec.ts:34` |
-| BR-04 | A threat level must be 1, 2, or 3, enforced by PostgreSQL and request validation. | `test/threat-alerts.e2e-spec.ts:113` |
+| --- | ---- | ---- |
+| BR-01 | Return every available squad whose maximum threat capability meets the submitted threat level. | `src/threat-alerts/services/threat-alerts.service.spec.ts:54` |
+| BR-04 | Reject threat levels outside 1, 2, and 3 without returning candidates or persisting invalid data. | `src/threat-alerts/services/threat-alerts.service.spec.ts:68` |
 
 ## Gates
 
@@ -16,8 +16,8 @@
 
 ## Out of scope
 
-Assigning an eligible squad during alert creation; eligibility is identified only.
+Authentication, authorization, squad assignment, and changes to candidate eligibility criteria.
 
 ## Cost
 
-Tokens: unavailable · USD: unavailable · Duration: unavailable
+Tokens: not recorded · USD: not recorded · Duration: not recorded
