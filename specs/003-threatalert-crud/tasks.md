@@ -19,7 +19,7 @@ description: "Implementation tasks for ThreatAlert CRUD"
 
 **Independent Test**: Create alerts with valid and invalid threat levels against the HTTP interface and real PostgreSQL; verify persisted defaults, the BR-01 eligibility query, and BR-04 rejection without a stored invalid row.
 
-- [ ] T001 [US1] Deliver the ThreatAlert creation vertical slice: add the BR-04 `ThreatAlert.threatLevel` PostgreSQL CHECK constraint and versioned migration in `prisma/schema.prisma` and `prisma/migrations/`; register `src/threat-alerts/threat-alerts.module.ts` in `src/app.module.ts`; add creation DTO, repository eligibility query, service, controller, and focused unit/e2e tests under `src/threat-alerts/` and `test/threat-alerts.e2e-spec.ts` that name BR-01 and BR-04, including a real-PostgreSQL BR-04 constraint test. Outcome: valid creates are pending and unassigned, execute the BR-01 query, and reject invalid levels. Covers BR-01, BR-04. Commit: `feat(threat-alerts): create alerts and evaluate eligibility`.
+- [x] T001 [US1] Deliver the ThreatAlert creation vertical slice: add the BR-04 `ThreatAlert.threatLevel` PostgreSQL CHECK constraint and versioned migration in `prisma/schema.prisma` and `prisma/migrations/`; register `src/threat-alerts/threat-alerts.module.ts` in `src/app.module.ts`; add creation DTO, repository eligibility query, service, controller, and focused unit/e2e tests under `src/threat-alerts/` and `test/threat-alerts.e2e-spec.ts` that name BR-01 and BR-04, including a real-PostgreSQL BR-04 constraint test. Outcome: valid creates are pending and unassigned, execute the BR-01 query, and reject invalid levels. Covers BR-01, BR-04. Commit: `feat(threat-alerts): create alerts and evaluate eligibility`.
 
 **Checkpoint**: A valid alert can be reported and eligibility is evaluated without assigning a squad.
 
@@ -31,7 +31,7 @@ description: "Implementation tasks for ThreatAlert CRUD"
 
 **Independent Test**: Seed pending and resolved alerts, then verify the list response contains both and lookup returns a known alert or a safe not-found result.
 
-- [ ] T002 [US2] Extend the existing ThreatAlert repository, service, controller, and focused unit/e2e or contract tests in `src/threat-alerts/repositories/threat-alerts.repository.ts`, `src/threat-alerts/services/threat-alerts.service.ts`, `src/threat-alerts/controllers/threat-alerts.controller.ts`, `src/threat-alerts/**/*.spec.ts`, `test/threat-alerts.e2e-spec.ts`, and `test/threat-alerts.contract.e2e-spec.ts` for list and get operations. Outcome: all alerts, including resolved alerts, are retrievable and absent identities map to the shared safe not-found response. BR coverage: none newly introduced. Commit: `feat(threat-alerts): retrieve alert records`.
+- [x] T002 [US2] Extend the existing ThreatAlert repository, service, controller, and focused unit/e2e or contract tests in `src/threat-alerts/repositories/threat-alerts.repository.ts`, `src/threat-alerts/services/threat-alerts.service.ts`, `src/threat-alerts/controllers/threat-alerts.controller.ts`, `src/threat-alerts/**/*.spec.ts`, `test/threat-alerts.e2e-spec.ts`, and `test/threat-alerts.contract.e2e-spec.ts` for list and get operations. Outcome: all alerts, including resolved alerts, are retrievable and absent identities map to the shared safe not-found response. BR coverage: none newly introduced. Commit: `feat(threat-alerts): retrieve alert records`.
 
 **Checkpoint**: Alert visibility works independently of creation-time eligibility behavior.
 
