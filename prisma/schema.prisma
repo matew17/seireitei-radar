@@ -28,7 +28,7 @@ enum AlertStatus {
 
 model ThreatAlert {
     id          String      @id @default(uuid())
-    threatLevel Int // 1, 2, or 3
+    threatLevel Int // BR-04: 1, 2, or 3
     latitude    Float
     longitude   Float
     status      AlertStatus @default(PENDING)
