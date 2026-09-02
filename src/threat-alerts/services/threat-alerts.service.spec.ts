@@ -85,3 +85,28 @@ describe('ThreatAlertsService create', () => {
     expect(findEligibleSquads).not.toHaveBeenCalled();
   });
 });
+
+describe('ThreatAlertsService maintenance boundary', () => {
+  const existingAlert = {
+    id: 'alert-id',
+    threatLevel: 2,
+    latitude: 35.1,
+    longitude: 139.1,
+    status: 'PENDING' as const,
+    squadId: null,
+    createdAt: new Date('2026-09-01T00:00:00.000Z'),
+  };
+
+  it('rejects status and squad mutations instead of forwarding them to the repository', async () => {
+    const update = jest.fn().mockResolvedValue(existingAlert);
+    const service = new ThreatAlertsService({ update } as never);
+
+    await expect(
+      service.update(existingAlert.id, {
+        status: 'RESOLVED',
+        squadId: 'assigned-squad-id',
+      } as never),
+    ).rejects.toMatchObject({ statusCode: 400 });
+    expect(update).not.toHaveBeenCalled();
+  });
+});

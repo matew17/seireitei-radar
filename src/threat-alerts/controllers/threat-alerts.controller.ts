@@ -1,6 +1,15 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import type { ThreatAlert } from '../../../generated/prisma/client';
 import { CreateThreatAlertDto } from '../dto/create-threat-alert.dto';
+import { UpdateThreatAlertDto } from '../dto/update-threat-alert.dto';
 import { ThreatAlertsService } from '../services/threat-alerts.service';
 
 @Controller('threat-alerts')
@@ -22,5 +31,18 @@ export class ThreatAlertsController {
   @Get(':id')
   findOne(@Param('id') id: string): Promise<ThreatAlert> {
     return this.threatAlertsService.get(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateThreatAlertDto: UpdateThreatAlertDto,
+  ): Promise<ThreatAlert> {
+    return this.threatAlertsService.update(id, updateThreatAlertDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string): Promise<ThreatAlert> {
+    return this.threatAlertsService.remove(id);
   }
 }

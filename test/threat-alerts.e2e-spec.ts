@@ -118,6 +118,49 @@ describe('ThreatAlert creation (e2e)', () => {
     ).rejects.toThrow('ThreatAlert_threatLevel_check');
   });
 
+  it('BR-04: rejects invalid updated threat levels through the PostgreSQL check constraint', async () => {
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 2, latitude: 35.3, longitude: 139.3 },
+    });
+
+    await expect(
+      threatAlertsRepository.update(alert.id, { threatLevel: 4 }),
+    ).rejects.toThrow('ThreatAlert_threatLevel_check');
+
+    await expect(
+      prisma.threatAlert.findUnique({ where: { id: alert.id } }),
+    ).resolves.toMatchObject({
+      threatLevel: 2,
+      latitude: 35.3,
+      longitude: 139.3,
+      status: 'PENDING',
+      squadId: null,
+    });
+  });
+
+  it('BR-04: rejects an invalid threat level in a direct PostgreSQL update and preserves the row', async () => {
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 2, latitude: 35.3, longitude: 139.3 },
+    });
+
+    await expect(
+      prisma.threatAlert.update({
+        where: { id: alert.id },
+        data: { threatLevel: 0 },
+      }),
+    ).rejects.toThrow('ThreatAlert_threatLevel_check');
+
+    await expect(
+      prisma.threatAlert.findUnique({ where: { id: alert.id } }),
+    ).resolves.toMatchObject({
+      threatLevel: 2,
+      latitude: 35.3,
+      longitude: 139.3,
+      status: 'PENDING',
+      squadId: null,
+    });
+  });
+
   it('returns every alert in the list, including resolved alerts', async () => {
     const pending = await prisma.threatAlert.create({
       data: { threatLevel: 1, latitude: 35.1, longitude: 139.1 },
@@ -193,5 +236,121 @@ describe('ThreatAlert creation (e2e)', () => {
     const responseBody = response.body as { message: unknown };
     expect(typeof responseBody.message).toBe('string');
     expect(JSON.stringify(response.body)).not.toMatch(/prisma|database|sql/i);
+  });
+
+  it('updates only the supplied threat level and coordinates while preserving omitted details', async () => {
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 1, latitude: 35.3, longitude: 139.3 },
+    });
+
+    const response = await request(app.getHttpServer())
+      .patch(`/threat-alerts/${alert.id}`)
+      .send({ threatLevel: 3, latitude: 35.9 })
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      id: alert.id,
+      threatLevel: 3,
+      latitude: 35.9,
+      longitude: 139.3,
+      status: 'PENDING',
+      squadId: null,
+    });
+    await expect(
+      prisma.threatAlert.findUnique({ where: { id: alert.id } }),
+    ).resolves.toMatchObject({
+      threatLevel: 3,
+      latitude: 35.9,
+      longitude: 139.3,
+      status: 'PENDING',
+      squadId: null,
+    });
+  });
+
+  it('rejects an empty update and fields outside threat level and coordinates', async () => {
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 2, latitude: 35.3, longitude: 139.3 },
+    });
+
+    await request(app.getHttpServer())
+      .patch(`/threat-alerts/${alert.id}`)
+      .send({})
+      .expect(400);
+    await request(app.getHttpServer())
+      .patch(`/threat-alerts/${alert.id}`)
+      .send({ status: 'RESOLVED' })
+      .expect(400);
+
+    await expect(
+      prisma.threatAlert.findUnique({ where: { id: alert.id } }),
+    ).resolves.toMatchObject({
+      threatLevel: 2,
+      latitude: 35.3,
+      longitude: 139.3,
+      status: 'PENDING',
+    });
+  });
+
+  it('rejects an invalid updated threat level without changing the alert', async () => {
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 2, latitude: 35.3, longitude: 139.3 },
+    });
+
+    const response = await request(app.getHttpServer())
+      .patch(`/threat-alerts/${alert.id}`)
+      .send({ threatLevel: 4 })
+      .expect(400);
+
+    expect(response.body).toEqual(
+      expect.objectContaining({ code: 'VALIDATION_ERROR' }),
+    );
+    await expect(
+      prisma.threatAlert.findUnique({ where: { id: alert.id } }),
+    ).resolves.toMatchObject({
+      threatLevel: 2,
+      latitude: 35.3,
+      longitude: 139.3,
+    });
+  });
+
+  it('marks an alert resolved while retaining it in the list', async () => {
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 2, latitude: 35.3, longitude: 139.3 },
+    });
+
+    await request(app.getHttpServer())
+      .delete(`/threat-alerts/${alert.id}`)
+      .expect(200)
+      .expect(({ body }) =>
+        expect(body).toMatchObject({ id: alert.id, status: 'RESOLVED' }),
+      );
+
+    const list = await request(app.getHttpServer())
+      .get('/threat-alerts')
+      .expect(200);
+    expect(list.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: alert.id, status: 'RESOLVED' }),
+      ]),
+    );
+    await expect(
+      prisma.threatAlert.findUnique({ where: { id: alert.id } }),
+    ).resolves.toMatchObject({
+      status: 'RESOLVED',
+    });
+  });
+
+  it('returns not found when updating or removing an absent alert', async () => {
+    for (const method of ['patch', 'delete'] as const) {
+      const response = await request(app.getHttpServer())
+        [method]('/threat-alerts/does-not-exist')
+        .send(method === 'patch' ? { threatLevel: 2 } : undefined)
+        .expect(404);
+
+      expect(response.body).toEqual(
+        expect.objectContaining({ code: 'NOT_FOUND' }),
+      );
+      expect(JSON.stringify(response.body)).not.toMatch(/prisma|database|sql/i);
+    }
   });
 });
