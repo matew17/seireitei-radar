@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: ThreatAlert Candidate Response APIs
+  version: 0.1.0
+paths:
+  /threat-alerts:
+    post:
+      summary: Create a threat alert and return eligible squad candidates
+      operationId: createThreatAlert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateThreatAlertRequest'
+      responses:
+        '201':
+          description: Threat alert created with BR-01 candidate squads
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreatAlertWithCandidateSquads'
+        '400':
+          description: Invalid alert input, including BR-04 violations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /threat-alerts/{id}:
+    patch:
+      summary: Update a threat alert and return eligible candidates when severity is submitted
+      operationId: updateThreatAlert
+      parameters:
+        - $ref: '#/components/parameters/ThreatAlertId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateThreatAlertRequest'
+      responses:
+        '200':
+          description: Updated threat alert. Includes candidateSquads when the request submits threatLevel; otherwise returns the existing ThreatAlert schema.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ThreatAlertWithCandidateSquads'
+                  - $ref: '#/components/schemas/ThreatAlertWithoutCandidateSquads'
+        '400':
+          description: Invalid alert input, including BR-04 violations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Threat alert not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  parameters:
+    ThreatAlertId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    ThreatAlert:
+      type: object
+      required:
+        - id
+        - threatLevel
+        - latitude
+        - longitude
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+        threatLevel:
+          type: integer
+          enum: [1, 2, 3]
+        latitude:
+          type: number
+        longitude:
+          type: number
+        status:
+          type: string
+          enum: [PENDING, ASSIGNED, RESOLVED]
+        squadId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    ThreatAlertWithCandidateSquads:
+      allOf:
+        - $ref: '#/components/schemas/ThreatAlert'
+        - type: object
+          required:
+            - candidateSquads
+          properties:
+            candidateSquads:
+              type: array
+              items:
+                $ref: '#/components/schemas/Squad'
+    ThreatAlertWithoutCandidateSquads:
+      allOf:
+        - $ref: '#/components/schemas/ThreatAlert'
+        - not:
+            required:
+              - candidateSquads
+    Squad:
+      type: object
+      required:
+        - id
+        - number
+        - captainName
+        - isAvailable
+        - maxThreatLevel
+        - currentLat
+        - currentLng
+      properties:
+        id:
+          type: string
+        number:
+          type: integer
+        captainName:
+          type: string
+        isAvailable:
+          type: boolean
+        maxThreatLevel:
+          type: integer
+          enum: [1, 2, 3]
+        currentLat:
+          type: number
+        currentLng:
+          type: number
+    CreateThreatAlertRequest:
+      type: object
+      required:
+        - threatLevel
+        - latitude
+        - longitude
+      properties:
+        threatLevel:
+          type: integer
+          enum: [1, 2, 3]
+        latitude:
+          type: number
+        longitude:
+          type: number
+    UpdateThreatAlertRequest:
+      type: object
+      minProperties: 1
+      properties:
+        threatLevel:
+          type: integer
+          enum: [1, 2, 3]
+        latitude:
+          type: number
+        longitude:
+          type: number
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: string
