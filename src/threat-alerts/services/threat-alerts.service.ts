@@ -5,10 +5,12 @@ import type {
   ThreatAlert,
 } from '../../../generated/prisma/client';
 import {
+  ConflictError,
   NotFoundError,
   ValidationError,
 } from '../../common/errors/domain-error';
 import {
+  type AutomaticAssignmentResult,
   ThreatAlertsRepository,
   type ThreatAlertUpdateInput,
 } from '../repositories/threat-alerts.repository';
@@ -56,6 +58,12 @@ export class ThreatAlertsService {
 
   async list(): Promise<ThreatAlert[]> {
     return this.threatAlertsRepository.list();
+  }
+
+  async assign(id: string): Promise<ThreatAlert> {
+    const result = await this.threatAlertsRepository.assignAutomatically(id);
+
+    return this.mapAssignmentResult(result);
   }
 
   async update(
@@ -134,6 +142,19 @@ export class ThreatAlertsService {
       throw new ValidationError(
         'ThreatAlert updates may only include threatLevel, latitude, and longitude',
       );
+    }
+  }
+
+  private mapAssignmentResult(result: AutomaticAssignmentResult): ThreatAlert {
+    switch (result.kind) {
+      case 'ASSIGNED':
+        return result.threatAlert;
+      case 'NOT_FOUND':
+        throw new NotFoundError('ThreatAlert not found');
+      case 'NOT_PENDING_OR_UNASSIGNED':
+        throw new ConflictError('ThreatAlert is not pending and unassigned');
+      case 'NO_ELIGIBLE_SQUAD':
+        throw new ConflictError('No eligible squad available');
     }
   }
 }
