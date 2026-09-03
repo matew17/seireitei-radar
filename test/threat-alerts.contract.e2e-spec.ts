@@ -87,6 +87,13 @@ function assertArray(value: unknown): asserts value is unknown[] {
   expect(Array.isArray(value)).toBe(true);
 }
 
+function assertValidationErrorResponse(
+  body: unknown,
+): asserts body is { code: 'VALIDATION_ERROR' } {
+  assertRecord(body);
+  expect(body.code).toBe('VALIDATION_ERROR');
+}
+
 function assertThreatAlertWithCandidateSquadsResponse(
   body: unknown,
 ): asserts body is ThreatAlertWithCandidateSquadsResponse {
@@ -171,6 +178,57 @@ describe('ThreatAlert API OpenAPI contract (T003)', () => {
       squadId: null,
       candidateSquads: [eligible],
     });
+  });
+
+  it('BR-03/BR-04: assignment success returns the established alert schema without candidateSquads', async () => {
+    const squad = await prisma.squad.create({
+      data: {
+        number: 1,
+        captainName: 'Eligible',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 3, latitude: 35.3, longitude: 139.3 },
+    });
+    const response = await request(app.getHttpServer())
+      .post(`/threat-alerts/${alert.id}/assign`)
+      .expect(200);
+
+    assertThreatAlertResponse(response.body);
+    expect(response.body).toMatchObject({
+      id: alert.id,
+      threatLevel: 3,
+      status: 'ASSIGNED',
+      squadId: squad.id,
+    });
+    expect(response.body).not.toHaveProperty('candidateSquads');
+  });
+
+  it('BR-07: assignment of a missing alert returns the safe not-found contract', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/threat-alerts/00000000-0000-4000-8000-000000000000/assign')
+      .expect(404);
+    expect(response.body).toEqual({
+      code: 'NOT_FOUND',
+      message: 'ThreatAlert not found',
+    });
+    expect(JSON.stringify(response.body)).not.toMatch(/prisma|database|sql/i);
+  });
+
+  it('T001: assignment with a malformed alert id returns a safe 400 validation error', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/threat-alerts/not-a-uuid/assign')
+      .expect(400);
+
+    expect(response.body).toEqual(
+      expect.objectContaining({ code: 'VALIDATION_ERROR' }),
+    );
+    assertValidationErrorResponse(response.body);
+    expect(JSON.stringify(response.body)).not.toMatch(/prisma|database|sql/i);
   });
 
   it('T003: returns the ThreatAlert schema without candidateSquads for a location-only update', async () => {

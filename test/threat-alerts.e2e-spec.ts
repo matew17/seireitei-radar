@@ -82,6 +82,240 @@ describe('ThreatAlert creation (e2e)', () => {
     expect(response.body).toHaveProperty('createdAt');
   });
 
+  it('BR-05: assigns an available squad with sufficient capability and preserves availability', async () => {
+    const squad = await prisma.squad.create({
+      data: {
+        number: 7,
+        captainName: 'Available',
+        isAvailable: true,
+        maxThreatLevel: 2,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 2, latitude: 35.1, longitude: 139.1 },
+    });
+
+    const response = await request(app.getHttpServer())
+      .post(`/threat-alerts/${alert.id}/assign`)
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      id: alert.id,
+      threatLevel: 2,
+      status: 'ASSIGNED',
+      squadId: squad.id,
+    });
+    await expect(
+      prisma.squad.findUnique({ where: { id: squad.id } }),
+    ).resolves.toMatchObject({
+      isAvailable: true,
+    });
+  });
+
+  it('BR-06: selects the eligible squad with the lowest squad number', async () => {
+    const higher = await prisma.squad.create({
+      data: {
+        number: 9,
+        captainName: 'Higher',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+    const lower = await prisma.squad.create({
+      data: {
+        number: 3,
+        captainName: 'Lower',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 2, latitude: 35.1, longitude: 139.1 },
+    });
+
+    const response = await request(app.getHttpServer())
+      .post(`/threat-alerts/${alert.id}/assign`)
+      .expect(200);
+
+    const assignedSquadId = (response.body as { squadId: string | null })
+      .squadId;
+    expect(assignedSquadId).toBe(lower.id);
+    expect(assignedSquadId).not.toBe(higher.id);
+  });
+
+  it('BR-01: reports no eligible squad and leaves the alert pending and unassigned', async () => {
+    await prisma.squad.create({
+      data: {
+        number: 1,
+        captainName: 'Unavailable',
+        isAvailable: false,
+        maxThreatLevel: 3,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 3, latitude: 35.1, longitude: 139.1 },
+    });
+
+    const response = await request(app.getHttpServer())
+      .post(`/threat-alerts/${alert.id}/assign`)
+      .expect(409);
+
+    expect(response.body).toMatchObject({
+      code: 'CONFLICT',
+      message: 'No eligible squad available',
+    });
+    await expect(
+      prisma.threatAlert.findUnique({ where: { id: alert.id } }),
+    ).resolves.toMatchObject({ status: 'PENDING', squadId: null });
+  });
+
+  it('BR-05: PostgreSQL rejects a direct assignment to an unavailable or insufficient squad', async () => {
+    const squad = await prisma.squad.create({
+      data: {
+        number: 1,
+        captainName: 'Insufficient',
+        isAvailable: false,
+        maxThreatLevel: 1,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+    const alert = await prisma.threatAlert.create({
+      data: { threatLevel: 3, latitude: 35.1, longitude: 139.1 },
+    });
+
+    await expect(
+      prisma.threatAlert.update({
+        where: { id: alert.id },
+        data: { status: 'ASSIGNED', squadId: squad.id },
+      }),
+    ).rejects.toThrow();
+    await expect(
+      prisma.threatAlert.findUnique({ where: { id: alert.id } }),
+    ).resolves.toMatchObject({ status: 'PENDING', squadId: null });
+  });
+
+  it('T001: PostgreSQL rejects direct invalid assignment-state changes', async () => {
+    const squad = await prisma.squad.create({
+      data: {
+        number: 1,
+        captainName: 'Assigned',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+    const pendingAlert = await prisma.threatAlert.create({
+      data: { threatLevel: 2, latitude: 35.1, longitude: 139.1 },
+    });
+    const assignedAlert = await prisma.threatAlert.create({
+      data: {
+        threatLevel: 2,
+        latitude: 35.2,
+        longitude: 139.2,
+        status: 'ASSIGNED',
+        squadId: squad.id,
+      },
+    });
+    const otherSquad = await prisma.squad.create({
+      data: {
+        number: 2,
+        captainName: 'Other',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+
+    await expect(
+      prisma.threatAlert.update({
+        where: { id: pendingAlert.id },
+        data: { status: 'ASSIGNED' },
+      }),
+    ).rejects.toThrow();
+    await expect(
+      prisma.threatAlert.update({
+        where: { id: assignedAlert.id },
+        data: { status: 'PENDING', squadId: null },
+      }),
+    ).rejects.toThrow();
+    await expect(
+      prisma.threatAlert.update({
+        where: { id: assignedAlert.id },
+        data: { squadId: otherSquad.id },
+      }),
+    ).rejects.toThrow();
+
+    await expect(
+      prisma.threatAlert.findUnique({ where: { id: pendingAlert.id } }),
+    ).resolves.toMatchObject({ status: 'PENDING', squadId: null });
+    await expect(
+      prisma.threatAlert.findUnique({ where: { id: assignedAlert.id } }),
+    ).resolves.toMatchObject({ status: 'ASSIGNED', squadId: squad.id });
+  });
+
+  it('BR-03: PostgreSQL rejects a squad capability outside levels 1 through 3', async () => {
+    await expect(
+      prisma.squad.create({
+        data: {
+          number: 1,
+          captainName: 'Invalid',
+          isAvailable: true,
+          maxThreatLevel: 4,
+          currentLat: 35,
+          currentLng: 139,
+        },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('BR-07: rejects assignment for assigned and resolved alerts without changing them', async () => {
+    const squad = await prisma.squad.create({
+      data: {
+        number: 1,
+        captainName: 'Existing',
+        isAvailable: true,
+        maxThreatLevel: 3,
+        currentLat: 35,
+        currentLng: 139,
+      },
+    });
+    for (const status of ['ASSIGNED', 'RESOLVED'] as const) {
+      const alert = await prisma.threatAlert.create({
+        data: {
+          threatLevel: 2,
+          latitude: 35.1,
+          longitude: 139.1,
+          status,
+          squadId: status === 'ASSIGNED' ? squad.id : null,
+        },
+      });
+      const response = await request(app.getHttpServer())
+        .post(`/threat-alerts/${alert.id}/assign`)
+        .expect(409);
+      expect(response.body).toMatchObject({
+        code: 'CONFLICT',
+        message: 'ThreatAlert is not pending and unassigned',
+      });
+      await expect(
+        prisma.threatAlert.findUnique({ where: { id: alert.id } }),
+      ).resolves.toMatchObject({
+        status,
+        squadId: status === 'ASSIGNED' ? squad.id : null,
+      });
+    }
+  });
+
   it('BR-01: returns an empty candidateSquads collection when no squad qualifies', async () => {
     await prisma.squad.create({
       data: {

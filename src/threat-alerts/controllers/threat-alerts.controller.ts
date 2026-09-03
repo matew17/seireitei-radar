@@ -3,11 +3,13 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
 } from '@nestjs/common';
 import type { ThreatAlert } from '../../../generated/prisma/client';
+import { AssignThreatAlertDto } from '../dto/assign-threat-alert.dto';
 import { CreateThreatAlertDto } from '../dto/create-threat-alert.dto';
 import { UpdateThreatAlertDto } from '../dto/update-threat-alert.dto';
 import {
@@ -24,6 +26,14 @@ export class ThreatAlertsController {
     @Body() createThreatAlertDto: CreateThreatAlertDto,
   ): Promise<ThreatAlertResponse> {
     return this.threatAlertsService.create(createThreatAlertDto);
+  }
+
+  @Post(':id/assign')
+  @HttpCode(200)
+  assign(
+    @Param() assignThreatAlertDto: AssignThreatAlertDto,
+  ): Promise<ThreatAlert> {
+    return this.threatAlertsService.assign(assignThreatAlertDto.id);
   }
 
   @Get()
